@@ -1,0 +1,7 @@
+delay
+delay.exe
+build/
+*.tr0
+compile_commands.json
+.deps
+*.log
