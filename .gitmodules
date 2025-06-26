@@ -1,0 +1,3 @@
+[submodule "submodules/ToyTran"]
+	path = submodules/ToyTran
+	url = https://github.com/bravo-t/ToyTran.git
