@@ -234,51 +234,6 @@ populatePWLData(double tDelta, double vdd,
 }
 
 static inline double
-chargeInTimeInterval(double I0, double I1, double timeInterval)
-{
-  return (I0 + I1) * timeInterval / 2;
-}
-
-static double
-totalCharge(const std::vector<WaveformPoint>& waveform)
-{
-  double charge = 0;
-  double prevT = 0;
-  double prevI = 0;
-  for (const WaveformPoint& p : waveform) {
-    charge += chargeInTimeInterval(prevI, p._value, p._time - prevT);
-    prevT = p._time;
-    prevI = p._value;
-  }
-  return charge;
-}
-
-static double
-simCapCharge(const SimResult& result, const Device& device)
-{
-  if (device._type != DeviceType::Resistor && device._type != DeviceType::VoltageSource) {
-    printf("ERROR: total charge calculation is only supported on resistors and voltage sources\n");
-    return 0;
-  }
-  if (device._type == DeviceType::Resistor) {
-    const std::vector<WaveformPoint>& posWaveform = result.nodeVoltageWaveform(device._posNode).data();
-    const std::vector<WaveformPoint>& negWaveform = result.nodeVoltageWaveform(device._negNode).data();
-    std::vector<WaveformPoint> currentWaveform;
-    currentWaveform.reserve(posWaveform.size());
-    for (size_t i = 0; i < posWaveform.size(); ++i) {
-      const WaveformPoint& posData = posWaveform[i];
-      const WaveformPoint& negData = negWaveform[i];
-      currentWaveform.push_back({posData._time, (posData._value - negData._value)/device._value});
-      return totalCharge(currentWaveform);
-    }
-  } else {
-    const std::vector<WaveformPoint>& currentWaveform = result.deviceCurrentWaveform(device._devId).data();
-    return totalCharge(currentWaveform);
-  }
-  return 0;
-}
-
-static inline double
 effCapCharge(double tDelta, double effCap, double rd, double vdd)
 {
   double tConstant = effCap * rd;
@@ -352,7 +307,7 @@ RampVCellDelay::calcIteration()
   sim.run();
   const SimResult& simResult = sim.simulationResult();
   const Device& driverSource = _ckt->device(_cellArc->driverSourceId());
-  double totalCharge = std::abs(simCapCharge(simResult, driverSource));
+  double totalCharge = std::abs(simResult.totalCharge(driverSource));
   double vdd = _cellArc->nldmData()->owner()->voltage();
   RootSolver::Function fEffCap = [this, totalCharge, vdd](const Eigen::VectorXd& x)->double {
     return effCapCharge(this->_tDelta, x(0), _rd, vdd) - totalCharge;
