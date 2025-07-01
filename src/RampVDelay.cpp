@@ -41,7 +41,7 @@ setTerminationCondition(const Circuit* ckt, const CellArc* driverArc,
         double libVoltage = libData->voltage();
         double termPoint = libData->riseTransitionHighThres();
         if (isRiseOnDriverPin == false) {
-          termPoint = 100 - libData->fallTransitionLowThres();
+          termPoint = libData->fallTransitionLowThres() - 100;
         }
         double v = libVoltage * termPoint / 100;
         if (isRiseOnDriverPin) {
@@ -88,7 +88,7 @@ measureVoltage(const SimResult& result, size_t nodeId, const LibData* libData,
   double lowerThres = libData->riseTransitionLowThres();
   double upperThres = libData->riseTransitionHighThres();
   if (isRise == false) {
-    delayThres = libData->fallDelayThres();
+    delayThres = -libData->fallDelayThres();
     lowerThres = libData->fallTransitionLowThres();
     upperThres = libData->fallTransitionHighThres();
   }
