@@ -51,6 +51,10 @@ CCSDriverData::initVoltageWaveforms(const CCSGroup& luts)
 	}
 }
 
+double
+CCSDriverData::referenceTime(double inputTran) const
+{
 
+}
 
 }
