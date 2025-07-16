@@ -105,6 +105,35 @@ getInputTransitionForIndex(const CCSLUTS& luts,
   return luts[searchPos[idx]].inputTransition();
 }
 
+static inline size_t
+indexByTransition(const CCSGroup& ccsData, double inputTran) 
+{
+  const CCSLUTS& luts = ccsData.tables();
+  const std::vector<size_t>& searchPos = ccsData.searchSteps();
+  
+  size_t lower = 1;
+  size_t upper = searchPos.size()-2;
+  if (inputTran <= getInputTransitionForIndex(luts, searchPos, lower)) {
+    return 0;
+  }
+  if (inputTran >= getInputTransitionForIndex(luts, searchPos, upper)) {
+    return upper;
+  }
+  size_t idx = 0;
+  while (upper - lower > 1) {
+    idx = (lower + upper) >> 1;
+    if (getInputTransitionForIndex(luts, searchPos, idx) > inputTran) {
+      upper = idx;
+    } else {
+      lower = idx;
+    }
+  }
+  if (getInputTransitionForIndex(luts, searchPos, idx) > inputTran) {
+    --idx;
+  }
+  return idx;
+}
+
 static inline void 
 indexByTransition(const CCSGroup& ccsData, double inputTran, 
                   size_t& beginIdx, size_t& endIdx)
@@ -156,7 +185,14 @@ CCSDriverData::referenceTime(double inputTran) const
 }
 
 Waveform
-CSSDriverData::driverWaveform(double inputTran, double outputLoad) const
+CCSDriverData::driverWaveform(double inputTran, double outputLoad) const
+{
+
+}
+
+Waveform
+CCSDriverData::interpolateVoltageWaveforms(double inputTran, double outputLoad, 
+                                           const std::vector<double>& timeSteps) const
 {
 
 }
