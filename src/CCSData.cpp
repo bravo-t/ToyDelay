@@ -12,6 +12,22 @@ CCSDriverData::CCSDriverData(const CCSArc* arc, bool isRise)
   initVoltageWaveforms(_arc->getCurrent(type));
 }
 
+const CCSGroup&
+CCSDriverData::ccsGroup() const 
+{
+  LUTType type = LUTType::RiseCurrent;
+  if (isRise == false) {
+    type = LUTType::FallCurrent;
+  }
+  return _arc->getCurrent(type);
+}
+
+const CCSLUT&
+CCSDriverData::ccsTable(size_t index) const
+{
+  return ccsGroup().tables()[index];
+}
+
 Waveform
 calcVoltageWaveform(const CCSLUT& lutData, bool isRise) 
 {
@@ -99,10 +115,12 @@ indexByTransition(const CCSGroup& ccsData, double inputTran,
   size_t lower = 1;
   size_t upper = searchPos.size()-2;
   if (inputTran <= getInputTransitionForIndex(luts, searchPos, lower)) {
-    return searchPos[0];
+    beginIdx = searchPos[0];
+    endIdx = searchPos[1];
   }
   if (inputTran >= getInputTransitionForIndex(luts, searchPos, upper)) {
-    return searchPos[upper];
+    beginIdx = searchPos[upper];
+    endIdx = searchPos[upper+1];
   }
   size_t idx = 0;
   while (upper - lower > 1) {
@@ -116,11 +134,29 @@ indexByTransition(const CCSGroup& ccsData, double inputTran,
   if (getInputTransitionForIndex(luts, searchPos, idx) > inputTran) {
     --idx;
   }
-  return searchPos[idx];
+  beginIdx = searchPos[idx];
+  endIdx = searchPos[idx+1];
 }
 
 double
 CCSDriverData::referenceTime(double inputTran) const
+{
+  size_t idx1 = 0;
+  size_t idx2 = 0;
+  indexByTransition(ccsGroup(), inputTran, idx1, idx2);
+  const CCSLUT& tbl1 = ccsTable(idx1);
+  const CCSLUT& tbl2 = ccsTable(idx2);
+  double rt1 = tbl1.referenceTime();
+  double tran1 = tbl1.inputTransition();
+  double rt2 = tbl2.referenceTime();
+  double tran2 = tbl2.inputTransition();
+  double k = (rt1 - rt2) / (tran1 - tran2);
+  double b = rt1 - k*tran1;
+  return k*inputTran + b;
+}
+
+Waveform
+CSSDriverData::driverWaveform(double inputTran, double outputLoad) const
 {
 
 }
