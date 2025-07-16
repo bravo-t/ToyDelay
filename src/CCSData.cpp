@@ -190,10 +190,31 @@ CCSDriverData::driverWaveform(double inputTran, double outputLoad) const
 
 }
 
+static inline void
+findBoundingIndex(const CCSGroup& groupData, double intpuTran, double outputLoad, 
+                  size_t& idx1, size_t& idx2, size_t& idx3, size_t& idx4)
+{
+  size_t searchPos1 = indexByTransition(groupData, inputTran);
+  const std::vector<size_t>& searchPos = groupData.searchSteps();
+  assert(searchPos1 != searchPos.size()-2);
+  size_t searchPos2 = searchPos1 + 1;
+  size_t beginIdx1 = seachPos[searchPos1];
+  size_t endIdx1 = seachPos[searchPos2];
+  idx1 = indexByLoad(groupData, beginIdx1, endIdx1, outputLoad);
+  idx2 = idx1 + 1;
+  size_t beginIdx2 = seachPos[searchPos2];
+  size_t endIdx2 = seachPos[searchPos2+1];
+  idx3 = indexByLoad(groupData, beginIdx2, endIdx2, outputLoad);
+  idx4 = idx1 + 1;
+}
+
 Waveform
 CCSDriverData::interpolateVoltageWaveforms(double inputTran, double outputLoad, 
                                            const std::vector<double>& timeSteps) const
 {
+  const CCSGroup& groupData = ccsGroup();
+  size_t idx1 = 0, idx2 = 0, idx3 = 0, idx4 = 0;
+  findBoundingIndex(groupData, inputTran, outputLoad, idx1, idx2, idx3, idx4);
 
 }
 
