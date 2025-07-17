@@ -1,6 +1,6 @@
 #include <vector>
+#include "Base.h"
 #include "LibData.h"
-#include "SimResult.h"  /// For Waveform
 
 namespace NA {
 

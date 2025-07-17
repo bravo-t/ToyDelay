@@ -190,7 +190,7 @@ CCSDriverData::driverWaveform(double inputTran, double outputLoad) const
 
 }
 
-static inline void
+static void
 findBoundingIndex(const CCSGroup& groupData, double intpuTran, double outputLoad, 
                   size_t& idx1, size_t& idx2, size_t& idx3, size_t& idx4)
 {
@@ -208,6 +208,27 @@ findBoundingIndex(const CCSGroup& groupData, double intpuTran, double outputLoad
   idx4 = idx1 + 1;
 }
 
+static Waveform
+interpolateWaveform(const Waveform& v11, const Waveform& v12, 
+                    const Waveform& v21, const Waveform& v22,
+                    double inputTran1, double outputLoad1, 
+                    double inputTran2, double outputLoad2,
+                    double inputTran, double outputLoad, 
+                    const std::vector<double>& timeSteps)
+{
+  Waveform voltages;
+  for (double time : timeSteps) {
+    double q11 = v11.value(time);
+    double q12 = v12.value(time);
+    double q21 = v21.value(time);
+    double q22 = v22.value(time);
+    double q = bilinearInterpolate(inputTran1, outputLoad1, inputTran2, outputLoad2, 
+                                   q11, q12, q21, q22, inputTran, outputLoad);
+    voltages.addPoint(time, q);
+  }
+  return voltages;
+}
+
 Waveform
 CCSDriverData::interpolateVoltageWaveforms(double inputTran, double outputLoad, 
                                            const std::vector<double>& timeSteps) const
@@ -215,7 +236,16 @@ CCSDriverData::interpolateVoltageWaveforms(double inputTran, double outputLoad,
   const CCSGroup& groupData = ccsGroup();
   size_t idx1 = 0, idx2 = 0, idx3 = 0, idx4 = 0;
   findBoundingIndex(groupData, inputTran, outputLoad, idx1, idx2, idx3, idx4);
-
+  const CCSLUT& lut1 = groupData->tables()[idx1];
+  const CCSLUT& lut4 = groupData->tables()[idx4];
+  const Waveform& v11 = _voltageWaveforms[idx1];
+  const Waveform& v12 = _voltageWaveforms[idx2];
+  const Waveform& v21 = _voltageWaveforms[idx3];
+  const Waveform& v22 = _voltageWaveforms[idx4];
+  return interpolateWaveform(v11, v12, v21, v22, 
+                             lut1.inputTransition(), lut1.outputLoad(), 
+                             lut4.inputTransition(), lut4.outputLoad(), 
+                             inputTran, outputLoad, timeSteps);
 }
 
 }
