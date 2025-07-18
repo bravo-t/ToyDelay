@@ -1,4 +1,4 @@
-#include "CCSData.h"
+#include "CCSDriverData.h"
 
 namespace NA {
 
@@ -246,6 +246,39 @@ CCSDriverData::interpolateVoltageWaveforms(double inputTran, double outputLoad,
                              lut1.inputTransition(), lut1.outputLoad(), 
                              lut4.inputTransition(), lut4.outputLoad(), 
                              inputTran, outputLoad, timeSteps);
+}
+
+static double
+timeAtVoltage(const Waveform& v11, const Waveform& v12, 
+              const Waveform& v21, const Waveform& v22,
+              double inputTran1, double outputLoad1, 
+              double inputTran2, double outputLoad2,
+              double inputTran, double outputLoad, double voltage) const
+{
+  double t11 = v11.measure(voltage);
+  double t12 = v12.measure(voltage);
+  double t21 = v21.measure(voltage);
+  double t22 = v22.measure(voltage);
+  return bilinearInterpolate(inputTran1, outputLoad1, inputTran2, outputLoad2, 
+                             t11, t12, t21, t22, inputTran, outputLoad);
+}
+
+double
+CCSDriverData::timeAtVoltage(double inputTran, double outputLoad, double voltage) const
+{
+  const CCSGroup& groupData = ccsGroup();
+  size_t idx1 = 0, idx2 = 0, idx3 = 0, idx4 = 0;
+  findBoundingIndex(groupData, inputTran, outputLoad, idx1, idx2, idx3, idx4);
+  const CCSLUT& lut1 = groupData->tables()[idx1];
+  const CCSLUT& lut4 = groupData->tables()[idx4];
+  const Waveform& v11 = _voltageWaveforms[idx1];
+  const Waveform& v12 = _voltageWaveforms[idx2];
+  const Waveform& v21 = _voltageWaveforms[idx3];
+  const Waveform& v22 = _voltageWaveforms[idx4];
+  return ::NA::timeAtVoltage(v11, v12, v21, v22, 
+                             lut1.inputTransition(), lut1.outputLoad(), 
+                             lut4.inputTransition(), lut4.outputLoad(), 
+                             inputTran, outputLoad,, voltage);
 }
 
 }

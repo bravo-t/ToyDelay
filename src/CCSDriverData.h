@@ -10,6 +10,7 @@ class CCSDriverData {
     
     double referenceTime(double inputTran) const;
     Waveform driverWaveform(double inputTran, double outputLoad);
+    double timeAtVoltage(double inputTran, double outputLoad, double voltage) const;
 
   private:
     initVoltageWaveforms(const CCSGroup& luts);
@@ -18,12 +19,11 @@ class CCSDriverData {
     Waveform interpolateVoltageWaveforms(double inputTran, double outputLoad, 
                                          const std::vector<double>& timeSteps) const;
 
-
   private:
     bool                  _isRise;
     const CCSArc*         _arc;
     std::vector<Waveform> _voltageWaveforms;
-
+    std::vector<double>   _regionVoltage;
 };
 
 
