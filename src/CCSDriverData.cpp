@@ -1,6 +1,27 @@
 #include "CCSDriverData.h"
+#include "LibData.h"
 
 namespace NA {
+
+void
+initVoltageRegions(bool extend, bool isRise, const LibData* libData, 
+                   std::vector<double>& voltageRegions)
+{
+  double fullVoltage = libData->voltage();
+  double vth = 0, vh = 0, vl = 0;
+  if (isRise) {
+    vth = libData->riseDelayThres() / 100.0 * fullVoltage;
+    vh = libData->riseTransitionHighThres() / 100.0 * fullVoltage;
+    vl = libData->riseTransitionLowThres() / 100.0 * fullVoltage;
+  } else {
+    vth = -libData->fallDelayThres() / 100.0 * fullVoltage;
+    vh = -libData->fallTransitionHighThres() / 100.0 * fullVoltage;
+    vl = -libData->fallTransitionLowThres() / 100.0 * fullVoltage;
+  }
+  if (extend) {
+
+  }
+}
 
 CCSDriverData::CCSDriverData(const CCSArc* arc, bool isRise)
 : _isRise(isRise), _arc(arc)
