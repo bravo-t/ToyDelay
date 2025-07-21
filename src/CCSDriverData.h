@@ -1,3 +1,6 @@
+#ifndef _NA_CCSDRV_H_
+#define _NA_CCSDRV_H_
+
 #include <vector>
 #include "Base.h"
 #include "LibData.h"
@@ -29,7 +32,6 @@ class CCSDriverData {
     std::vector<double>   _regionVoltage;
 };
 
-
-
-
 }
+
+#endif
