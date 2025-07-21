@@ -7,13 +7,16 @@
 
 namespace NA {
 
-class CCSReceiverData {
+class Circuit;
+   
+class CSMReceiver {
   public:
+    CSMReceiver(Circuit* ckt);
+    void updateCap() const;
 
   private:
-
   private:
-
+    Circuit* _ckt = nullptr;
 };
 
 }
