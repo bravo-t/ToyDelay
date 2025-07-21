@@ -5,10 +5,13 @@ namespace NA {
 
 void
 initVoltageRegions(bool extend, bool isRise, const LibData* libData, 
-                   std::vector<double>& voltageRegions)
+                   std::vector<double>& voltageRegions, 
+                   double& vth, double& vl, double& vh)
 {
   double fullVoltage = libData->voltage();
-  double vth = 0, vh = 0, vl = 0;
+  vth = 0;
+  vh = 0; 
+  vl = 0;
   if (isRise) {
     vth = libData->riseDelayThres() / 100.0 * fullVoltage;
     vh = libData->riseTransitionHighThres() / 100.0 * fullVoltage;
@@ -18,9 +21,22 @@ initVoltageRegions(bool extend, bool isRise, const LibData* libData,
     vh = -libData->fallTransitionHighThres() / 100.0 * fullVoltage;
     vl = -libData->fallTransitionLowThres() / 100.0 * fullVoltage;
   }
+  voltageRegions.clear();
+  voltageRegions.push_back(0.0f);
   if (extend) {
-
+    for (size_t i=0; i<10; ++i) {
+      if (isRise) {
+        voltageRegions.push_back(0.1*fullVoltage*(i+1));
+      } else {
+        voltageRegions.push_back(-0.1*fullVoltage*(i+1));
+      }
+    }
   }
+  voltageRegions.push_back(vl);
+  voltageRegions.push_back(vh);
+  voltageRegions.push_back(vth);
+  std::sort(voltageRegions.begin(), voltageRegions.end());
+  voltageRegions.erase(std::unique(voltageRegions.begin(), voltageRegions.end()), voltageRegions.end());
 }
 
 CCSDriverData::CCSDriverData(const CCSArc* arc, bool isRise)
@@ -31,6 +47,7 @@ CCSDriverData::CCSDriverData(const CCSArc* arc, bool isRise)
     type = LUTType::FallCurrent;
   }
   initVoltageWaveforms(_arc->getCurrent(type));
+  initVoltageRegions(false, isRise, arc->owner(), _voltageRegions, _vth, _vl, _vh);
 }
 
 const CCSGroup&
@@ -208,7 +225,12 @@ CCSDriverData::referenceTime(double inputTran) const
 Waveform
 CCSDriverData::driverWaveform(double inputTran, double outputLoad) const
 {
-
+  std::vector<double> timeSteps;
+  for (double v : _voltageRegions) {
+    double t = timeAtVoltage(inputTran, outputLoad, v);
+    timeSteps.push_back(t);
+  }
+  return interpolateVoltageWaveforms(inputTran, outputLoad, timeSteps);
 }
 
 static void

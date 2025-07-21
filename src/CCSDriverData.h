@@ -22,6 +22,9 @@ class CCSDriverData {
   private:
     bool                  _isRise;
     const CCSArc*         _arc;
+    double                _vth;
+    double                _vl;
+    double                _vh;
     std::vector<Waveform> _voltageWaveforms;
     std::vector<double>   _regionVoltage;
 };
