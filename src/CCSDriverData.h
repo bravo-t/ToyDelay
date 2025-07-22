@@ -9,7 +9,8 @@ namespace NA {
 
 class CCSDriverData {
   public:
-    CCSDriverData(const CCSArc* cellArc, bool isRise);
+    CCSDriverData() = default;
+    void init(const CCSArc* cellArc, bool isRise);
     
     double referenceTime(double inputTran) const;
     Waveform driverWaveform(double inputTran, double outputLoad);

@@ -4,6 +4,7 @@
 #include "Circuit.h"
 #include "LibData.h"
 #include "SimResult.h"
+#include "CSMDriver.h"
 
 namespace NA {
 
@@ -12,8 +13,7 @@ class Circuit;
 
 class CSMCellDelay {
   public: 
-    CSMCellDelay(const CellArc* cellArc, Circuit* ckt)
-    : _cellArc(cellArc), _ckt(ckt), _libData(cellArc->nldmData()->owner()) {}
+    CSMCellDelay(const CellArc* cellArc, Circuit* ckt);
 
     bool calculate();
 
@@ -21,11 +21,14 @@ class CSMCellDelay {
     bool isRiseOnOutputPin() const { return _isRiseOnDriverPin; }
 
   private:
+    void updateCircuit() const;
+    void initData();
 
   private:
     const CellArc* _cellArc;
     Circuit* _ckt;
     const LibData* _libData;
+    std::vector<Device*> _loadCaps;
     SimResult _finalResult;
     bool   _isRiseOnInputPin = true;
     bool   _isRiseOnDriverPin = true;
@@ -33,6 +36,7 @@ class CSMCellDelay {
     double _delayThres = 50;
     double _tranThres1 = 10;
     double _tranThres2 = 90;
+    CSMDriver _driver;   
 };
 
 }

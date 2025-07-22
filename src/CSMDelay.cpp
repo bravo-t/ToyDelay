@@ -31,12 +31,11 @@ CSMDelay::calculate()
 void
 CSMDelay::calculateArc(const CellArc* driverArc)
 {
-  RampVCellDelay cellDelayCalc(driverArc, &_ckt);
+  CSMCellDelay cellDelayCalc(driverArc, &_ckt);
   cellDelayCalc.calculate();
-  if (Debug::enabled(DebugModule::NLDM)) {
+  if (Debug::enabled(DebugModule::CCS)) {
     printf("DEBUG: Starting network simulation for net arc delay calculation\n");
   }
-  double tOffset = cellDelayCalc.tZero();
   AnalysisParameter simParam;
   simParam._name = simName;
   simParam._type = AnalysisType::Tran;
@@ -57,10 +56,10 @@ CSMDelay::calculateArc(const CellArc* driverArc)
   double outputT50;
   double outputTran;
   measureVoltage(simResult, outputNodeId, libData, outputT50, outputTran);
-  double cellDelay = outputT50 - inputT50 + tOffset;
+  double cellDelay = outputT50 - inputT50;
   printf("Cell delay of %s:%s->%s: %G, transition on output pin: %G\n", driverArc->instance().data(), driverArc->fromPin().data(), 
           driverArc->toPin().data(), cellDelay, outputTran);
-  if (Debug::enabled(DebugModule::NLDM)) {
+  if (Debug::enabled(DebugModule::CCS)) {
     PlotData cellArcPlotData;
     cellArcPlotData._canvasName = "Cell Delay";
     populatePlotData(cellArcPlotData, driverArc->inputNode(), driverArc->outputNode(&_ckt), &_ckt);

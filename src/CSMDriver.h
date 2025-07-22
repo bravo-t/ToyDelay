@@ -10,10 +10,13 @@ class CellArc;
 
 class CSMDriver {
   public:
-    CSMDriver(Circuit* ckt, const CellArc* driverArc);
+    CSMDriver() = default;
+    void init(Circuit* ckt, const CellArc* driverArc, bool isRise);
     updateDriver() const;
   private:
-    CCSDriverData _driverData;
+    const CellArc* _driverArc = nullptr;
+    Circuit*       _ckt = nullptr;
+    CCSDriverData  _driverData;
 }
 
 

@@ -39,9 +39,11 @@ initVoltageRegions(bool extend, bool isRise, const LibData* libData,
   voltageRegions.erase(std::unique(voltageRegions.begin(), voltageRegions.end()), voltageRegions.end());
 }
 
-CCSDriverData::CCSDriverData(const CCSArc* arc, bool isRise)
-: _isRise(isRise), _arc(arc)
+void
+CCSDriverData::init(const CCSArc* arc, bool isRise)
 {
+  _isRise = isRise;
+  _arc = arc;
   LUTType type = LUTType::RiseCurrent;
   if (isRise == false) {
     type = LUTType::FallCurrent;
