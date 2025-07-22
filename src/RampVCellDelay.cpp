@@ -29,6 +29,7 @@ void
 markSimulationScope(size_t rdId, Circuit* ckt)
 {
   const std::vector<const Device*>& connDevs = ckt->traceDevice(rdId);
+  ckt->resetSimulationScope();
   ckt->markSimulationScope(connDevs);
 }
 

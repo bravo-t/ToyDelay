@@ -30,7 +30,8 @@ class CCSDriverData {
     double                _vl;
     double                _vh;
     std::vector<Waveform> _voltageWaveforms;
-    std::vector<double>   _regionVoltage;
+    std::vector<double>   _timeSteps;
+    std::vector<double>   _voltageSteps;
 };
 
 }

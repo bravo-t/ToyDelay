@@ -49,7 +49,7 @@ CCSDriverData::init(const CCSArc* arc, bool isRise)
     type = LUTType::FallCurrent;
   }
   initVoltageWaveforms(_arc->getCurrent(type));
-  initVoltageRegions(false, isRise, arc->owner(), _voltageRegions, _vth, _vl, _vh);
+  initVoltageRegions(false, isRise, arc->owner(), _voltageSteps, _vth, _vl, _vh);
 }
 
 const CCSGroup&

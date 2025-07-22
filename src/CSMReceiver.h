@@ -11,12 +11,13 @@ class Circuit;
    
 class CSMReceiver {
   public:
-    CSMReceiver(Circuit* ckt);
-    void updateCap() const;
+    CSMReceiver(Circuit* ckt, const CellArc* loadArc);
+    void calcLoadCap() const;
 
   private:
   private:
-    Circuit* _ckt = nullptr;
+    const CellArc* _loadArc = nullptr;
+    Circuit*       _ckt = nullptr;
 };
 
 }

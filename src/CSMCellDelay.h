@@ -13,11 +13,11 @@ class Circuit;
 
 class CSMCellDelay {
   public: 
-    CSMCellDelay(const CellArc* cellArc, Circuit* ckt);
+    CSMCellDelay(const CellArc* cellArc, Circuit* ckt, bool isMaxDelay);
 
     bool calculate();
 
-    SimResult result() const { return _finalResult; }
+    SimResult result() const { return _simResult; }
     bool isRiseOnOutputPin() const { return _isRiseOnDriverPin; }
 
   private:
@@ -29,10 +29,11 @@ class CSMCellDelay {
     Circuit* _ckt;
     const LibData* _libData;
     std::vector<Device*> _loadCaps;
-    SimResult _finalResult;
+    SimResult _simResult;
     bool   _isRiseOnInputPin = true;
     bool   _isRiseOnDriverPin = true;
     bool   _setTerminationCondition = false;
+    bool   _isMaxDelay = true;
     double _delayThres = 50;
     double _tranThres1 = 10;
     double _tranThres2 = 90;
