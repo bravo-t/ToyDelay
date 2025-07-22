@@ -13,10 +13,16 @@ class CSMDriver {
   public:
     CSMDriver() = default;
     void init(Circuit* ckt, const CellArc* driverArc, bool isRise);
-    void updateCircuit(const SimResult& simResult) const;
+    /// timeStart and timeEnd are the start and end time of current voltage region
+    void updateCircuit(const SimResult& simResult, double timeStart, double timeEnd);
+  private:
+    void calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd);
   private:
     const CellArc* _driverArc = nullptr;
     Circuit*       _ckt = nullptr;
+    double         _effCap = 0; /// Cache for performance
+    double         _capCharge = 0; /// charge value for previous iteration of simulation
+    double         _voltage = 0;   /// voltage of previous iteration
     CCSDriverData  _driverData;
 }
 
