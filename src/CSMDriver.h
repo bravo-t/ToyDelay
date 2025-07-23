@@ -14,9 +14,11 @@ class CSMDriver {
     CSMDriver() = default;
     void init(Circuit* ckt, const CellArc* driverArc, bool isRise);
     /// timeStart and timeEnd are the start and end time of current voltage region
-    void updateCircuit(const SimResult& simResult, double timeStart, double timeEnd);
+    void updateCircuit(const SimResult& simResult, double timeStart, double timeEnd) const;
+
+    void cacheData(const SimResult& simResult, double timeStart, double timeEnd);
   private:
-    void calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd);
+    void calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd) const;
   private:
     const CellArc* _driverArc = nullptr;
     Circuit*       _ckt = nullptr;
