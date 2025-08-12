@@ -25,7 +25,8 @@ CFLAG+=-L$(SRC_DIR)/submodules/ToyTran
 SRC_LIST = main.cpp \
 		   DelayCalculator.cpp \
 		   RampVDelay.cpp \
-		   RampVCellDelay.cpp
+		   RampVCellDelay.cpp \
+		   RootSolver.cpp
 
 SRC_LIST_TMP = $(patsubst %,./%,$(SRC_LIST))
 SRC_FULL_LIST = $(patsubst %,$(SRC_DIR)/%,$(SRC_LIST))
