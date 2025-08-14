@@ -43,6 +43,8 @@ CSMDriver::updateCircuit(const SimResult& simResult, double timeStart, double ti
 {
   double effCap = calcEffectiveCap(simResult, timeStart, timeEnd);
   /// append voltage waveform from timeStart to timeEnd, to _driverArc->driverSource
+  double inputTran = _driverArc->inputTransition(_ckt);
+  
 }
 
 

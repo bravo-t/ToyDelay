@@ -14,6 +14,11 @@ class CSMDriver {
     CSMDriver() = default;
     void init(Circuit* ckt, const CellArc* driverArc, bool isRise);
     /// timeStart and timeEnd are the start and end time of current voltage region
+    /// UPDATE: remove timeStart and timeEnd, generate full driver voltage waveform instead, 
+    ///         If simResult is empty, effCap is constant throughout the simulation, 
+    ///         If simResult is available, generate effCaps for each voltage region based on simResult
+    ///         Then updateCircuit to set the simulation data
+    ///          
     void updateCircuit(const SimResult& simResult, double timeStart, double timeEnd) const;
 
     void cacheData(const SimResult& simResult, double timeStart, double timeEnd);
