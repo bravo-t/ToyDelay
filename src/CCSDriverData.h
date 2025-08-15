@@ -15,6 +15,9 @@ class CCSDriverData {
     double referenceTime(double inputTran) const;
     Waveform driverWaveform(double inputTran, double outputLoad);
     double timeAtVoltage(double inputTran, double outputLoad, double voltage) const;
+    std::vector<double> timeSteps(double inputTran, const std::vector<double>& effCaps) const;
+    std::vector<double> timeSteps(double inputTran, double outputLoad) const;
+
 
   private:
     initVoltageWaveforms(const CCSGroup& luts);
@@ -30,7 +33,6 @@ class CCSDriverData {
     double                _vl;
     double                _vh;
     std::vector<Waveform> _voltageWaveforms;
-    std::vector<double>   _timeSteps;
     std::vector<double>   _voltageSteps;
 };
 

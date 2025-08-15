@@ -235,6 +235,34 @@ CCSDriverData::driverWaveform(double inputTran, double outputLoad) const
   return interpolateVoltageWaveforms(inputTran, outputLoad, timeSteps);
 }
 
+std::vector<double>
+CCSDriverData::timeSteps(double inputTran, double outputLoad) const
+{
+  std::vector<double> timeSteps;
+  for (double v : _voltageRegions) {
+    double t = timeAtVoltage(inputTran, outputLoad, v);
+    timeSteps.push_back(t);
+  }
+  return timeSteps;
+}
+
+std::vector<double>
+CCSDriverData::timeSteps(double inputTran, const std::vector<double>& effCaps) const
+{
+  assert(effCaps.size() == 1 || effCaps.size() == _voltageRegions.size());
+  if (effCaps.size() == 1) {
+    return timeSteps(inputTran, effCaps[0]);
+  }
+  std::vector<double> timeSteps;
+  for (size_t i=0; i<effCaps.size(); ++i) {
+    double cap = effCaps[i];
+    double v = _voltageRegions[i];
+    double t = timeAtVoltage(inputTran, cap, v);
+    timeSteps.push_back(t);
+  }
+  return timeSteps;
+}
+
 static void
 findBoundingIndex(const CCSGroup& groupData, double intpuTran, double outputLoad, 
                   size_t& idx1, size_t& idx2, size_t& idx3, size_t& idx4)

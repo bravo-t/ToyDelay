@@ -19,7 +19,8 @@ class CSMDriver {
     ///         If simResult is available, generate effCaps for each voltage region based on simResult
     ///         Then updateCircuit to set the simulation data
     ///          
-    void updateCircuit(const SimResult& simResult, double timeStart, double timeEnd) const;
+    //void updateCircuit(const SimResult& simResult, double timeStart, double timeEnd) const;
+    void updateCircuit(const SimResult& simResult) const;
 
     void cacheData(const SimResult& simResult, double timeStart, double timeEnd);
   private:
@@ -27,9 +28,9 @@ class CSMDriver {
   private:
     const CellArc* _driverArc = nullptr;
     Circuit*       _ckt = nullptr;
-    double         _effCap = 0; /// Cache for performance
-    double         _capCharge = 0; /// charge value for previous iteration of simulation
-    double         _voltage = 0;   /// voltage of previous iteration
+    double         _inputTran = 0;
+    double         _effCap = 0;
+    std::vector<double> _timeSteps;
     CCSDriverData  _driverData;
 }
 
