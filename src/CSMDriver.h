@@ -12,7 +12,7 @@ class CellArc;
 class CSMDriver {
   public:
     CSMDriver() = default;
-    void init(Circuit* ckt, const CellArc* driverArc, bool isRise);
+    void init(Circuit* ckt, const CellArc* driverArc, bool isRise, const SimResult& simResult);
     /// timeStart and timeEnd are the start and end time of current voltage region
     /// UPDATE: remove timeStart and timeEnd, generate full driver voltage waveform instead, 
     ///         If simResult is empty, effCap is constant throughout the simulation, 
@@ -29,8 +29,8 @@ class CSMDriver {
     const CellArc* _driverArc = nullptr;
     Circuit*       _ckt = nullptr;
     double         _inputTran = 0;
-    double         _effCap = 0;
     std::vector<double> _timeSteps;
+    std::vector<double> _effCaps;
     CCSDriverData  _driverData;
 }
 

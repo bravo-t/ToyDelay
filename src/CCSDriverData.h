@@ -17,6 +17,7 @@ class CCSDriverData {
     double timeAtVoltage(double inputTran, double outputLoad, double voltage) const;
     std::vector<double> timeSteps(double inputTran, const std::vector<double>& effCaps) const;
     std::vector<double> timeSteps(double inputTran, double outputLoad) const;
+    std::vector<double> voltageRegions() const { return _voltageSteps; }
 
 
   private:
