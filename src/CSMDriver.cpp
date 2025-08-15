@@ -66,19 +66,14 @@ CSMDriver::calcEffectiveCap(const SimResult& simResult, double timeStart, double
   if (simResult.empty()) {
     return totalConnectedCap(_driverArc, _ckt);
   } else {
-    if (simResult.currentTime() < timeEnd) {
-      return _effCap;
-    } else {
-      const Device& driverSource = _ckt->device(_driverArc->driverSourceId);
-      double totalCharge = std::abs(simResult.totalCharge(driverSource));
-      double voltage = std::abs(simResult.nodeVoltage(driverSource._posNode, simResult.size()-1));
-      double newEffCap = (totalCharge - _capCharge) / (voltage - _voltage);
-      _capCharge = totalCharge;
-      _voltage = voltage;
-      _effCap = newEffCap;
-    }
+    const Device& driverSource = _ckt->device(_driverArc->driverSourceId);
+    /// Add new function in SimResult to calculate charge during a time period
+    double periodCharge = simResult.periodCharge(driverSource);
+    double startVoltage = simResult.nodeVoltage(driverSource._posNode, timeStart);
+    double endVoltage = simResult.nodeVoltage(driverSource._posNode, timeEnd);
+    double newEffCap = std::abs(periodCharge / (endVoltage - startVoltage));
+    return newEffCap;
   }
-
 }
 
 void
