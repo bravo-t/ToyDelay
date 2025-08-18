@@ -63,12 +63,6 @@ isVectorEqual(const std::vector<double>& a,
 }
 
 void
-CSMDriver::updateTimeStepsAndEffCaps(const SimResult& simResult, ) const
-{
-
-}
-
-void
 CSMDriver::updateDriverData(const SimResult& simResult)
 { 
   if (simResult.empty()) {
@@ -118,14 +112,34 @@ CSMDriver::calcEffectiveCap(const SimResult& simResult, double timeStart, double
   }
 }
 
+Waveform
+assembleDriverWaveform(const CCSDriverData& driverData, const std::vector<double>& timeSteps)
+{
+  const std::vector<double>& voltageRegions = driverData.voltageRegions();
+  assert(voltageRegions.size() == timeSteps.size());
+  Waveform waveform;
+  for (size_t i=0l i<timeSteps.size(); ++i) {
+    waveform.addPoint(timeSteps[i], voltageRegions[i]);
+  }
+  return waveform;
+}
+
 void
 CSMDriver::updateCircuit(const SimResult& simResult) const
 {
-  updateDriverData
-  /// First check current simTime, and choose the correct effCap from _effCaps, update circuit
-  double effCap = calcEffectiveCap(simResult, timeStart, timeEnd);
-  /// append voltage waveform from timeStart to timeEnd, to _driverArc->driverSource
-  
+  updateDriverData(simResult);
+  const Waveform& drvierWaveform = assembleDriverWaveform(_driverData, _timeSteps);
+  /// update driver data
+  const Device& driverSource = _ckt->device(_driverArc->driverSourceId());
+  PWLValue& driverData = _ckt->PWLData(driverSource);
+  double vdd = _driverArc->nldmData()->owner()->voltage();
+  //populatePWLData(_tZero, _tDelta, vdd, _isRiseOnDriverPin, driverData);
+  driverData._time.clear();
+  driverData._value.clear();
+  for (const auto& p : driverWaveform.data()) {
+    driverData._time.push_back(p._time);
+    driverData._value.push_back(p._value);
+  }
 }
 
 
