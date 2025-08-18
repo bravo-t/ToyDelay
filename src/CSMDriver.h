@@ -22,7 +22,6 @@ class CSMDriver {
     //void updateCircuit(const SimResult& simResult, double timeStart, double timeEnd) const;
     void updateCircuit(const SimResult& simResult) const;
 
-    void cacheData(const SimResult& simResult, double timeStart, double timeEnd);
   private:
     void calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd) const;
   private:

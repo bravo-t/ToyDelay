@@ -26,8 +26,8 @@ CSMDriver::init(Circuit* ckt, const CellArc* driverArc, bool isRise)
   _ckt = ckt;
   _driverData.init(driverArc->ccsData(), isRise);
   _inputTran = _driverArc->inputTransition(_ckt);
-  _effCaps.push_back(totalConnectedCap(_driverArc, _ckt));
-  _timeSteps = _driverData.timeSteps(_inputTran, _effCaps[0]);
+  //_effCaps.push_back(totalConnectedCap(_driverArc, _ckt));
+  //_timeSteps = _driverData.timeSteps(_inputTran, _effCaps[0]);
 }
 
 std::vector<double> 
@@ -45,19 +45,61 @@ timeRegions(const Waveform& driverVoltage, const std::vector<double>& voltageReg
   return timeRegion;
 }
 
-void
-CSMDriver::update(const SimResult& simResult)
-{ 
-  _effCaps.clear();
-  _effCaps.push_back(0); /// effCap @ T=0
-  for (size_t i=1; i<timeRegion.size(); ++i) {
-    _effCaps.push_back(calcEffectiveCap(simResult, timeRegion[i-1], timeRegion[i]));
+bool
+isVectorEqual(const std::vector<double>& a, 
+              const std::vector<double>& b) 
+{
+  double eps = 1e-6;
+  if (a.size() != b.size()) {
+    return false;
+  } 
+  for (size_t i=0l i<a.size(); ++i) {
+    double diff = a[i] - b[i];
+    if (std::abs((diff/a[i]) > eps || std::abs(diff/b[i])> eps) {
+      return false;
+    }
   }
-  const std::vector<double> newTimeSteps = _driverData.timeSteps(_inputTran, _effCaps);
-  _timeSteps.clear();
-  /// compare _timeSteps and newTimeSteps, iterate until stablizes?
-  /// or just assign?
-  _timeSteps = newTimeSteps;
+  return true;
+}
+
+void
+CSMDriver::updateTimeStepsAndEffCaps(const SimResult& simResult, ) const
+{
+
+}
+
+void
+CSMDriver::updateDriverData(const SimResult& simResult)
+{ 
+  if (simResult.empty()) {
+    _effCaps.push_back(totalConnectedCap(_driverArc, _ckt));
+    _timeSteps = _driverData.timeSteps(_inputTran, _effCaps[0]);
+  } else {
+    std::vector<double> newEffCaps;
+    newEffCaps.push_back(0); /// effCap @ T=0
+    for (size_t i=1; i<_timeSteps.size(); ++i) {
+      newEffCaps.push_back(calcEffectiveCap(simResult, _timeSteps[i-1], _timeSteps[i]));
+    }
+    const std::vector<double> newTimeSteps = _driverData.timeSteps(_inputTran, newEffCaps);
+    bool iterate = false;
+    while (iterate) {
+      if (isVectorEqual(_effCaps, newEffCaps) == false) {
+        _effCaps.swap(newEffCaps);
+        _timeSteps.swap(newTimeSteps);
+        newEffCaps.clear();
+        newTimeSteps.clear();
+        newEffCaps.push_back(0);
+        for (size_t i=1; i<_timeSteps.size(); ++i) {
+          newEffCaps.push_back(calcEffectiveCap(simResult, _timeSteps[i-1], _timeSteps[i]));
+        }
+        newTimeSteps = _driverData.timeSteps(_inputTran, newEffCaps);
+      } else {
+        break;
+      }
+    }
+    _effCaps.swap(newEffCaps);
+    _timeSteps.swap(newTimeSteps);
+  }
 }
 
 double
@@ -68,7 +110,7 @@ CSMDriver::calcEffectiveCap(const SimResult& simResult, double timeStart, double
   } else {
     const Device& driverSource = _ckt->device(_driverArc->driverSourceId);
     /// Add new function in SimResult to calculate charge during a time period
-    double periodCharge = simResult.periodCharge(driverSource);
+    double periodCharge = simResult.chargeBetween(driverSource, timeStart, timeEnd);
     double startVoltage = simResult.nodeVoltage(driverSource._posNode, timeStart);
     double endVoltage = simResult.nodeVoltage(driverSource._posNode, timeEnd);
     double newEffCap = std::abs(periodCharge / (endVoltage - startVoltage));
@@ -79,6 +121,7 @@ CSMDriver::calcEffectiveCap(const SimResult& simResult, double timeStart, double
 void
 CSMDriver::updateCircuit(const SimResult& simResult) const
 {
+  updateDriverData
   /// First check current simTime, and choose the correct effCap from _effCaps, update circuit
   double effCap = calcEffectiveCap(simResult, timeStart, timeEnd);
   /// append voltage waveform from timeStart to timeEnd, to _driverArc->driverSource
