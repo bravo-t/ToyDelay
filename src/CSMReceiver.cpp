@@ -1,3 +1,4 @@
+#include "LibData.h"
 #include "CSMReceiver.h"
 #include "RampVCellDelay.h"
 
@@ -17,7 +18,11 @@ CSMReceiver::calcReceiverCap(const SimResult& SimResult)
   nldmCalc.setIsInputTranRise(isRise);
   bool success = nldmCalc.calculate();
   double effCap = nldmCalc.effCap();
-  
+  LUTType rcvCapLUTType = LUTType::RiseRecvCap;
+  if (isRise == false) {
+    rcvCapLUTType = LUTType::FallRecvCap;
+  }
+  const NLDMLUT& recvCapLUT = _loadArc->getRecvCap(rcvCapLUTType);
 }
 
 
