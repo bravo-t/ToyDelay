@@ -105,16 +105,19 @@ RampVCellDelay::updateLoadCaps()
 void
 RampVCellDelay::initParameters()
 {
-  size_t vSrcId = _cellArc->inputSourceDevId(_ckt);
-  if (vSrcId == invalidId) {
-    printf("Cannot find input source device on driver model\n");
-    return;
+  if (_inputTran == -1) {
+    _inputTran = _cellArc->inputTransition(_ckt);
+    size_t vSrcId = _cellArc->inputSourceDevId(_ckt);
+    if (vSrcId == invalidId) {
+      printf("Cannot find input source device on driver model\n");
+      return;
+    }
+    const Device& vSrc = _ckt->device(vSrcId);
+    const PWLValue& data = _ckt->PWLData(vSrc);
+
+    _isRiseOnInputPin = data.isRiseTransition();
   }
-  const Device& vSrc = _ckt->device(vSrcId);
-  const PWLValue& data = _ckt->PWLData(vSrc);
-
-  _isRiseOnInputPin = data.isRiseTransition();
-
+  
   _isRiseOnDriverPin = (_isRiseOnInputPin != _cellArc->isInvertedArc());
   if (_isRiseOnDriverPin) {
     _delayThres = _libData->riseDelayThres();
@@ -127,7 +130,6 @@ RampVCellDelay::initParameters()
   }
   updateLoadCaps();
   _effCap =  totalLoadOnDriver(_ckt, _cellArc->driverResistorId());
-  _inputTran = _cellArc->inputTransition(_ckt);
   markSimulationScope(_cellArc->driverResistorId(), _ckt);
   updateTParams();
   updateRd();

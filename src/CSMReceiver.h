@@ -12,12 +12,19 @@ class Circuit;
 class CSMReceiver {
   public:
     CSMReceiver(Circuit* ckt, const CellArc* loadArc);
-    void calcLoadCap() const;
+    /// This function is called inside CSM calculation iteration
+    /// to update receiver capacitors
+    void updateCircuit(const SimResult& simResult) const;
+    /// This function is called after a CSM calculation iteration is finished
+    /// to calculate receiver cap values
+    void calcReceiverCap(const SimResult& simResult);
 
   private:
   private:
     const CellArc* _loadArc = nullptr;
     Circuit*       _ckt = nullptr;
+    std::vector<double> _recvCaps;
+    std::vector<double> _capThresholdVoltage;
 };
 
 }

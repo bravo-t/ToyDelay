@@ -24,6 +24,9 @@ class RampVCellDelay {
     SimResult result() const { return _finalResult; }
     bool isRiseOnOutputPin() const { return _isRiseOnDriverPin; }
 
+    void setInputTransition(double inputTran) { _inputTran = inputTran; }
+    void setIsInputTranRise(bool isRise) { _isRiseOnInputPin = isRise; }
+
   private:
     void initParameters();
     void updateParameters();
@@ -45,7 +48,7 @@ class RampVCellDelay {
     double _delayThres = 50;
     double _tranThres1 = 10;
     double _tranThres2 = 90;
-    double _inputTran = 0;
+    double _inputTran = -1;
     double _driverPinTran = 0;
     double _effCap = 0;
     double _tZero = 0;
