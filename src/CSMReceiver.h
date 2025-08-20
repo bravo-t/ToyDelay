@@ -14,7 +14,7 @@ class CSMReceiver {
     CSMReceiver(Circuit* ckt, const CellArc* loadArc);
     /// This function is called inside CSM calculation iteration
     /// to update receiver capacitors
-    void updateCircuit(const SimResult& simResult) const;
+    void updateCircuit(const SimResult& simResult);
     /// This function is called after a CSM calculation iteration is finished
     /// to calculate receiver cap values
     void calcReceiverCap(const SimResult& simResult);
