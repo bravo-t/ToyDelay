@@ -8,6 +8,15 @@ CSMCellDelay(const CellArc* cellArc, Circuit* ckt, bool isMaxDelay)
   _isMaxDelay(isMaxDelay)
 {}
 
+
+void
+markSimulationScope(size_t devId, Circuit* ckt)
+{
+  const std::vector<const Device*>& connDevs = ckt->traceDevice(devId);
+  ckt->resetSimulationScope();
+  ckt->markSimulationScope(connDevs);
+}
+
 void 
 CSMCellDelay::initData()
 {
@@ -40,6 +49,7 @@ CSMCellDelay::initData()
       _receiverMap.insert({dev._devId, recvr});
     }
   }
+  markSimulationScope(vSrcId, _ckt);
 }
 
 void
@@ -82,6 +92,28 @@ CSMCellDelay::updateReceiverModel(const SimResult& simResult) const
       rcvModel.calcReceiverCap(simResult);
     }
   }
+}
+
+bool
+CSMCellDelay::calcIteration()
+{
+  updateCircuit(_simResult);
+  _simResult.clear();
+  AnalysisParameter simParam;
+  simParam._type = AnalysisType::Tran;
+  simParam._simTime = _tDelta * 1.2;
+  simParam._simTick = simParam._simTime / 1000;
+  simParam._intMethod = IntegrateMethod::Trapezoidal;
+  Simulator sim(*_ckt, simParam);
+  std::function<void(void)> f = [this, &simResult]() {
+    this->updateReceiverCap(simResult);
+  };
+  sim.setUpdateFunction(f);
+  if (Debug::enabled(DebugModule::NLDM)) {
+    printf("DEBUG: start transient simualtion\n");
+  }
+  sim.run();
+  _simResult = sim.simulationResult();
 }
 
 }
