@@ -62,7 +62,7 @@ isVectorEqual(const std::vector<double>& a,
   return true;
 }
 
-void
+bool 
 CSMDriver::updateDriverData(const SimResult& simResult)
 { 
   if (simResult.empty()) {
@@ -73,6 +73,9 @@ CSMDriver::updateDriverData(const SimResult& simResult)
     newEffCaps.push_back(0); /// effCap @ T=0
     for (size_t i=1; i<_timeSteps.size(); ++i) {
       newEffCaps.push_back(calcEffectiveCap(simResult, _timeSteps[i-1], _timeSteps[i]));
+    }
+    if (isVectorEqual(_effCaps, newEffCaps)) {
+      return true;
     }
     const std::vector<double> newTimeSteps = _driverData.timeSteps(_inputTran, newEffCaps);
     bool iterate = false;
@@ -94,6 +97,7 @@ CSMDriver::updateDriverData(const SimResult& simResult)
     _effCaps.swap(newEffCaps);
     _timeSteps.swap(newTimeSteps);
   }
+  return false;
 }
 
 double
@@ -124,10 +128,10 @@ assembleDriverWaveform(const CCSDriverData& driverData, const std::vector<double
   return waveform;
 }
 
-void
+bool
 CSMDriver::updateCircuit(const SimResult& simResult) const
 {
-  updateDriverData(simResult);
+  bool converged = updateDriverData(simResult);
   const Waveform& drvierWaveform = assembleDriverWaveform(_driverData, _timeSteps);
   /// update driver data
   const Device& driverSource = _ckt->device(_driverArc->driverSourceId());
@@ -140,6 +144,7 @@ CSMDriver::updateCircuit(const SimResult& simResult) const
     driverData._time.push_back(p._time);
     driverData._value.push_back(p._value);
   }
+  return converged;
 }
 
 

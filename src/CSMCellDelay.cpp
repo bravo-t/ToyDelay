@@ -52,11 +52,11 @@ CSMCellDelay::initData()
   markSimulationScope(vSrcId, _ckt);
 }
 
-void
+bool
 CSMCellDelay::updateCircuit() const
 {
   updateReceiverCap(_simResult);
-  _driver.updateCircuit(_simResult);
+  return _driver.updateCircuit(_simResult);
 }
 
 void
@@ -95,9 +95,9 @@ CSMCellDelay::updateReceiverModel(const SimResult& simResult) const
 }
 
 bool
-CSMCellDelay::calcIteration()
+CSMCellDelay::calcIteration(bool& converged)
 {
-  updateCircuit(_simResult);
+  converged = updateCircuit(_simResult);
   _simResult.clear();
   AnalysisParameter simParam;
   simParam._type = AnalysisType::Tran;
@@ -114,6 +114,16 @@ CSMCellDelay::calcIteration()
   }
   sim.run();
   _simResult = sim.simulationResult();
+  return true;
+}
+
+bool
+CSMCellDelay::calculate()
+{
+  bool converged = false;
+  while (!converged) {
+    calcIteration(converged);
+  }
 }
 
 }
