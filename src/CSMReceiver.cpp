@@ -36,8 +36,8 @@ CSMReceiver::calcReceiverCap(const SimResult& SimResult)
   _capThresholdVoltage.push_back(voltage);
 }
 
-void 
-CSMReceiver::updateCircuit(const SimResult& simResult)
+double
+CSMReceiver::capValue(const SimResult& simResult) const
 {
   double loadCap = 0;
   if (simResult.empty() == false) {
@@ -60,9 +60,7 @@ CSMReceiver::updateCircuit(const SimResult& simResult)
   } else {
     loadCap = _loadArc->fixedLoadCap(_isInputRise);
   }
-  size_t loadDevId = _loadArc->inputLoadCapacitor(_ckt);
-  Device& dev = _ckt->device(loadDevId);
-  dev._value = loadCap;
+  return loadCap;
 }
 
 }

@@ -25,19 +25,23 @@ class CSMCellDelay {
     void initData();
 
   private:
-    const CellArc* _cellArc;
-    Circuit* _ckt;
-    const LibData* _libData;
+    const CellArc*       _cellArc;
+    Circuit*             _ckt;
+    const LibData*       _libData;
     std::vector<Device*> _loadCaps;
-    SimResult _simResult;
-    bool   _isRiseOnInputPin = true;
-    bool   _isRiseOnDriverPin = true;
-    bool   _setTerminationCondition = false;
-    bool   _isMaxDelay = true;
-    double _delayThres = 50;
-    double _tranThres1 = 10;
-    double _tranThres2 = 90;
-    CSMDriver _driver;   
+    SimResult            _simResult;
+    bool                 _isRiseOnInputPin = true;
+    bool                 _isRiseOnDriverPin = true;
+    bool                 _setTerminationCondition = false;
+    bool                 _isMaxDelay = true;
+    double               _delayThres = 50;
+    double               _tranThres1 = 10;
+    double               _tranThres2 = 90;
+    CSMDriver            _driver;   
+    
+    typedef std::vector<CSMReceiver> ReceiverVec;
+    typedef std::unordered_map<size_t, ReceiverVec> ReceiverMap;
+    ReceiverMap          _receiverMap;
 };
 
 }

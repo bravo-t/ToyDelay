@@ -6,20 +6,12 @@ CSMCellDelay(const CellArc* cellArc, Circuit* ckt, bool isMaxDelay)
 : _cellArc(cellArc), _ckt(ckt), 
   _libData(cellArc->nldmData()->owner()), 
   _isMaxDelay(isMaxDelay)
-{
-  size_t rdId = driverArc->driverResistorId();
-  const std::vector<const Device*>& connDevs = ckt->traceDevice(rdId);
-  std::vector<const CellArc*> retval;
-  for (const Device* dev : connDevs) {
-    if (dev->_type == DeviceType::Capacitor && dev->_isInternal) {
-      _loadCaps.push_back(dev);
-    }
-  }
-}
+{}
 
 void 
 CSMCellDelay::initData()
 {
+  /// init driver
   size_t vSrcId = _cellArc->inputSourceDevId(_ckt);
   if (vSrcId == invalidId) {
     printf("Cannot find input source device on driver model\n");
@@ -33,29 +25,41 @@ CSMCellDelay::initData()
   _isRiseOnDriverPin = (_isRiseOnInputPin != _cellArc->isInvertedArc());
 
   _driver.init(_ckt, _cellArc, _isRiseOnDriverPin);
+  
+  /// init receiver
+  size_t rdId = _cellArc->driverResistorId();
+  const std::vector<const Device*>& connDevs = _ckt->traceDevice(rdId);
+  for (const Device* dev : connDevs) {
+    if (dev->_type == DeviceType::Capacitor && dev->_isInternal) {
+      _loadCaps.push_back(dev);
+      const std::vector<CellArc*>& loadArcs = _ckt->cellArcsOfDevice(dev);
+      ReceiverVec recvr;
+      for (const CellArc* loadArc : loadArcs) {
+        recvr.push_back(CSMReceiver(_ckt, loadArc));
+      }
+      _receiverMap.insert({dev._devId, recvr});
+    }
+  }
 }
 
 void
 CSMCellDelay::updateCircuit() const
 {
-  if (_simResult.empty() == false) {
-    updateReceiverCap();
-  } else {
-    initReceiverCap();
-  }
+  updateReceiverCap(_simResult);
   _driver.updateCircuit(_simResult);
 }
 
 void
-CSMCellDelay::updateReceiverCap() const
+CSMCellDelay::updateReceiverCap(const SimResult& simResult) const
 {
   for (Device* loadCap : _loadCaps) {
+    size_t capId = loadCap->_devId;
+    const auto& found = _receiverMap.find(capId);
+    assert(found != _receiverMap.end());
+    const ReceiverVec& rcvModels = found->second;
     double cap = _isMaxDelay ? 0 : 1e99;
-    const std::vector<CellArc*>& loadArcs = ckt->cellArcsOfDevice(loadCap);
-    assert(arcs.empty() == false);
-    for (const CellArc* loadArc : loadArcs) {
-      CSMReceiver recvr(_ckt, loadArc);
-      double loadCap = recvr.calcLoadCap();
+    for (const CSMReceiver& rcvModel : rcvModels) {
+      double capValue = rcvModel.capValue(simResult);
       if (_isMaxDelay) {
         cap = std::max(cap, loadCap);
       } else {
@@ -70,25 +74,14 @@ CSMCellDelay::updateReceiverCap() const
 }
 
 void
-CSMCellDelay::initReceiverCap() const
+CSMCellDelay::updateReceiverModel(const SimResult& simResult) const
 {
-  for (Device* loadCap : _loadCaps) {
-    double cap = _isMaxDelay ? 0 : 1e99;
-    const std::vector<CellArc*>& arcs = _ckt->cellArcsOfDevice(dev);
-    assert(arcs.empty() == false);
-    for (const CellArc* loadArc : arcs) {
-      if (_isMaxDelay) {
-        cap = std::max(cap, loadArc->fixedLoadCap(_isRiseOnDriverPin));
-      } else {
-        cap = std::min(cap, loadArc->fixedLoadCap(_isRiseOnDriverPin));
-      }
-    }
-    loadCap->_value = cap;
-    if (Debug::enabled(DebugModule::CCS)) {
-      printf("DEBUG: Load cap %s init value set to %G\n", loadCap->_name.data(), loadCap->_value);
+  for (auto kv : _receiverMap) {
+    ReceiverVec& rcvModels = kv.second;
+    for (CSMReceiver& rcvModel : rcvModels) {
+      rcvModel.calcReceiverCap(simResult);
     }
   }
 }
-
 
 }
