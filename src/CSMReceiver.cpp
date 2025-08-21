@@ -12,6 +12,7 @@ CSMReceiver::calcReceiverCap(const SimResult& SimResult)
 {
   const Waveform& loadPinWaveform = simResult.nodeVoltageWaveform(_loadArc->inputTranNode());
   bool isRise = loadPinWaveform.isRise();
+  _isInputRise = isRise;
   const LibData* libData = _loadArc->libData();
   double inputTran = loadPinWaveform.transitionTime(libata);
   RampVCellDelay nldmCalc(_loadArc, _ckt);
@@ -25,12 +26,14 @@ CSMReceiver::calcReceiverCap(const SimResult& SimResult)
   }
   const std::vector<NLDMLUT>& recvCapLUT = _loadArc->getRecvCap(rcvCapLUTType);
   double voltage = libData->voltage();
+  if (isRise == false) voltage = -voltage;
   double dv = voltage / recvCapLUT.size();
   for (size_t i=0; i<recvCapLUT.size(); ++i) {
     _capThresholdVoltage.push_back(i*dv);
     const NLDMLUT& lut = recvCapLUT[i];
     _recvCaps.push_back(lut.value(inputTran, effCap));
   }
+  _capThresholdVoltage.push_back(voltage);
 }
 
 void 
@@ -38,9 +41,28 @@ CSMReceiver::updateCircuit(const SimResult& simResult)
 {
   double loadCap = 0;
   if (simResult.empty() == false) {
-    const Waveform& loadPinWaveform = simResult.nodeVoltage(_loadArc->inputTranNode());
-
+    double inputVoltage = simResult.latestVoltage(_loadArc->inputTranNode());
+    for (size_t i=1; i<_capThresholdVoltage.size(); ++i) {
+      double thresVoltage2 = _capThresholdVoltage[i];
+      double thresVoltage1 = _capThresholdVoltage[i-1];
+      if (_isInputRise) {
+        if (inputVoltage > thresVoltage1 && inputVoltage <= thresVoltage2) {
+          loadCap = _recvCaps[i-1];
+          break;
+        }
+      } else {
+        if (inputVoltage < thresVoltage1 && inputVoltage >= thresVoltage2) {
+          loadCap = _recvCaps[i-1];
+          break;
+        }
+      }
+    }
+  } else {
+    loadCap = _loadArc->fixedLoadCap(_isInputRise);
   }
+  size_t loadDevId = _loadArc->inputLoadCapacitor(_ckt);
+  Device& dev = _ckt->device(loadDevId);
+  dev._value = loadCap;
 }
 
 }

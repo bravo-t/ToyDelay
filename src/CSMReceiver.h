@@ -21,8 +21,9 @@ class CSMReceiver {
 
   private:
   private:
-    const CellArc* _loadArc = nullptr;
-    Circuit*       _ckt = nullptr;
+    bool                _isInputRise = true;
+    const CellArc*      _loadArc = nullptr;
+    Circuit*            _ckt = nullptr;
     std::vector<double> _recvCaps;
     std::vector<double> _capThresholdVoltage;
 };
