@@ -24,8 +24,14 @@ CFLAG+=-L$(SRC_DIR)/submodules/ToyTran
 
 SRC_LIST = main.cpp \
 		   DelayCalculator.cpp \
+		   CSMDelay.cpp \
+		   CSMCellDelay.cpp \
+		   CSMDriver.cpp \
+		   CSMReceiver.cpp \
+		   CCSDriverData.cpp \
 		   RampVDelay.cpp \
 		   RampVCellDelay.cpp \
+		   CommonUtils.cpp \
 		   RootSolver.cpp
 
 SRC_LIST_TMP = $(patsubst %,./%,$(SRC_LIST))

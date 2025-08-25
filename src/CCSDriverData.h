@@ -21,7 +21,7 @@ class CCSDriverData {
 
 
   private:
-    initVoltageWaveforms(const CCSGroup& luts);
+    void initVoltageWaveforms(const CCSGroup& luts);
     const CCSGroup& ccsGroup() const;
     const CCSLUT& ccsTable(size_t index) const;
     Waveform interpolateVoltageWaveforms(double inputTran, double outputLoad, 

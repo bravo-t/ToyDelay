@@ -5,6 +5,7 @@
 #include "LibData.h"
 #include "SimResult.h"
 #include "CSMDriver.h"
+#include "CSMReceiver.h"
 
 namespace NA {
 
@@ -43,11 +44,6 @@ class CSMCellDelay {
     typedef std::unordered_map<size_t, ReceiverVec> ReceiverMap;
     ReceiverMap          _receiverMap;
 };
-
-}
-
-
-
 
 }
 

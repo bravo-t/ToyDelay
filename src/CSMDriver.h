@@ -32,7 +32,7 @@ class CSMDriver {
     std::vector<double> _timeSteps;
     std::vector<double> _effCaps;
     CCSDriverData  _driverData;
-}
+};
 
 
 
