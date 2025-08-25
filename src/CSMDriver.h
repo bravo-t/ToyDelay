@@ -19,11 +19,11 @@ class CSMDriver {
     /// Then updateCircuit to set the simulation data
     /// The bool return value indicates if there is no significant change in _effCaps,
     /// which can be used to tell if the calculation is converged.
-    bool updateCircuit(const SimResult& simResult) const;
+    bool updateCircuit(const SimResult& simResult);
     double inputTransition() const { return _inputTran; }
 
   private:
-    void calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd) const;
+    double calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd) const;
     bool updateDriverData(const SimResult& simResult);
 
   private:

@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <cassert>
 #include "CCSDriverData.h"
 #include "LibData.h"
 
@@ -56,7 +58,7 @@ const CCSGroup&
 CCSDriverData::ccsGroup() const 
 {
   LUTType type = LUTType::RiseCurrent;
-  if (isRise == false) {
+  if (_isRise == false) {
     type = LUTType::FallCurrent;
   }
   return _arc->getCurrent(type);
@@ -102,10 +104,10 @@ void
 CCSDriverData::initVoltageWaveforms(const CCSGroup& luts)
 {
   const CCSLUTS& lutTables = luts.tables();
-  _voltageWaveforms.reserve(lutTbles.size());
+  _voltageWaveforms.reserve(lutTables.size());
   for (const CCSLUT& lutTable : lutTables) {
-    const Waveform& volWave = calcVoltageWaveform(lutTable);
-    _voltageWaveforms.push_back(volWage);
+    const Waveform& volWave = calcVoltageWaveform(lutTable, _isRise);
+    _voltageWaveforms.push_back(volWave);
   }
 }
 
@@ -228,7 +230,7 @@ Waveform
 CCSDriverData::driverWaveform(double inputTran, double outputLoad) const
 {
   std::vector<double> timeSteps;
-  for (double v : _voltageRegions) {
+  for (double v : _voltageSteps) {
     double t = timeAtVoltage(inputTran, outputLoad, v);
     timeSteps.push_back(t);
   }
@@ -239,7 +241,7 @@ std::vector<double>
 CCSDriverData::timeSteps(double inputTran, double outputLoad) const
 {
   std::vector<double> timeSteps;
-  for (double v : _voltageRegions) {
+  for (double v : _voltageSteps) {
     double t = timeAtVoltage(inputTran, outputLoad, v);
     timeSteps.push_back(t);
   }
@@ -249,14 +251,14 @@ CCSDriverData::timeSteps(double inputTran, double outputLoad) const
 std::vector<double>
 CCSDriverData::timeSteps(double inputTran, const std::vector<double>& effCaps) const
 {
-  assert(effCaps.size() == 1 || effCaps.size() == _voltageRegions.size());
+  assert(effCaps.size() == 1 || effCaps.size() == _voltageSteps.size());
   if (effCaps.size() == 1) {
     return timeSteps(inputTran, effCaps[0]);
   }
   std::vector<double> timeSteps;
   for (size_t i=0; i<effCaps.size(); ++i) {
     double cap = effCaps[i];
-    double v = _voltageRegions[i];
+    double v = _voltageSteps[i];
     double t = timeAtVoltage(inputTran, cap, v);
     timeSteps.push_back(t);
   }
@@ -264,19 +266,19 @@ CCSDriverData::timeSteps(double inputTran, const std::vector<double>& effCaps) c
 }
 
 static void
-findBoundingIndex(const CCSGroup& groupData, double intpuTran, double outputLoad, 
+findBoundingIndex(const CCSGroup& groupData, double inputTran, double outputLoad, 
                   size_t& idx1, size_t& idx2, size_t& idx3, size_t& idx4)
 {
   size_t searchPos1 = indexByTransition(groupData, inputTran);
   const std::vector<size_t>& searchPos = groupData.searchSteps();
   assert(searchPos1 != searchPos.size()-2);
   size_t searchPos2 = searchPos1 + 1;
-  size_t beginIdx1 = seachPos[searchPos1];
-  size_t endIdx1 = seachPos[searchPos2];
+  size_t beginIdx1 = searchPos[searchPos1];
+  size_t endIdx1 = searchPos[searchPos2];
   idx1 = indexByLoad(groupData, beginIdx1, endIdx1, outputLoad);
   idx2 = idx1 + 1;
-  size_t beginIdx2 = seachPos[searchPos2];
-  size_t endIdx2 = seachPos[searchPos2+1];
+  size_t beginIdx2 = searchPos[searchPos2];
+  size_t endIdx2 = searchPos[searchPos2+1];
   idx3 = indexByLoad(groupData, beginIdx2, endIdx2, outputLoad);
   idx4 = idx1 + 1;
 }
@@ -309,8 +311,8 @@ CCSDriverData::interpolateVoltageWaveforms(double inputTran, double outputLoad,
   const CCSGroup& groupData = ccsGroup();
   size_t idx1 = 0, idx2 = 0, idx3 = 0, idx4 = 0;
   findBoundingIndex(groupData, inputTran, outputLoad, idx1, idx2, idx3, idx4);
-  const CCSLUT& lut1 = groupData->tables()[idx1];
-  const CCSLUT& lut4 = groupData->tables()[idx4];
+  const CCSLUT& lut1 = groupData.tables()[idx1];
+  const CCSLUT& lut4 = groupData.tables()[idx4];
   const Waveform& v11 = _voltageWaveforms[idx1];
   const Waveform& v12 = _voltageWaveforms[idx2];
   const Waveform& v21 = _voltageWaveforms[idx3];
@@ -326,7 +328,7 @@ timeAtVoltage(const Waveform& v11, const Waveform& v12,
               const Waveform& v21, const Waveform& v22,
               double inputTran1, double outputLoad1, 
               double inputTran2, double outputLoad2,
-              double inputTran, double outputLoad, double voltage) const
+              double inputTran, double outputLoad, double voltage)
 {
   double t11 = v11.measure(voltage);
   double t12 = v12.measure(voltage);
@@ -342,8 +344,8 @@ CCSDriverData::timeAtVoltage(double inputTran, double outputLoad, double voltage
   const CCSGroup& groupData = ccsGroup();
   size_t idx1 = 0, idx2 = 0, idx3 = 0, idx4 = 0;
   findBoundingIndex(groupData, inputTran, outputLoad, idx1, idx2, idx3, idx4);
-  const CCSLUT& lut1 = groupData->tables()[idx1];
-  const CCSLUT& lut4 = groupData->tables()[idx4];
+  const CCSLUT& lut1 = groupData.tables()[idx1];
+  const CCSLUT& lut4 = groupData.tables()[idx4];
   const Waveform& v11 = _voltageWaveforms[idx1];
   const Waveform& v12 = _voltageWaveforms[idx2];
   const Waveform& v21 = _voltageWaveforms[idx3];
@@ -351,7 +353,7 @@ CCSDriverData::timeAtVoltage(double inputTran, double outputLoad, double voltage
   return ::NA::timeAtVoltage(v11, v12, v21, v22, 
                              lut1.inputTransition(), lut1.outputLoad(), 
                              lut4.inputTransition(), lut4.outputLoad(), 
-                             inputTran, outputLoad,, voltage);
+                             inputTran, outputLoad, voltage);
 }
 
 }

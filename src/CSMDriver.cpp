@@ -1,3 +1,4 @@
+#include <cassert>
 #include "CSMDriver.h"
 
 namespace NA {
@@ -53,9 +54,9 @@ isVectorEqual(const std::vector<double>& a,
   if (a.size() != b.size()) {
     return false;
   } 
-  for (size_t i=0l i<a.size(); ++i) {
+  for (size_t i=0; i<a.size(); ++i) {
     double diff = a[i] - b[i];
-    if (std::abs((diff/a[i]) > eps || std::abs(diff/b[i])> eps) {
+    if (std::abs((diff/a[i])) > eps || std::abs(diff/b[i])> eps) {
       return false;
     }
   }
@@ -77,7 +78,7 @@ CSMDriver::updateDriverData(const SimResult& simResult)
     if (isVectorEqual(_effCaps, newEffCaps)) {
       return true;
     }
-    const std::vector<double> newTimeSteps = _driverData.timeSteps(_inputTran, newEffCaps);
+    std::vector<double> newTimeSteps = _driverData.timeSteps(_inputTran, newEffCaps);
     bool iterate = false;
     while (iterate) {
       if (isVectorEqual(_effCaps, newEffCaps) == false) {
@@ -106,7 +107,7 @@ CSMDriver::calcEffectiveCap(const SimResult& simResult, double timeStart, double
   if (simResult.empty()) {
     return totalConnectedCap(_driverArc, _ckt);
   } else {
-    const Device& driverSource = _ckt->device(_driverArc->driverSourceId);
+    const Device& driverSource = _ckt->device(_driverArc->driverSourceId());
     /// Add new function in SimResult to calculate charge during a time period
     double periodCharge = simResult.chargeBetween(driverSource, timeStart, timeEnd);
     double startVoltage = simResult.nodeVoltage(driverSource._posNode, timeStart);
@@ -122,22 +123,20 @@ assembleDriverWaveform(const CCSDriverData& driverData, const std::vector<double
   const std::vector<double>& voltageRegions = driverData.voltageRegions();
   assert(voltageRegions.size() == timeSteps.size());
   Waveform waveform;
-  for (size_t i=0l i<timeSteps.size(); ++i) {
+  for (size_t i=0; i<timeSteps.size(); ++i) {
     waveform.addPoint(timeSteps[i], voltageRegions[i]);
   }
   return waveform;
 }
 
 bool
-CSMDriver::updateCircuit(const SimResult& simResult) const
+CSMDriver::updateCircuit(const SimResult& simResult)
 {
   bool converged = updateDriverData(simResult);
-  const Waveform& drvierWaveform = assembleDriverWaveform(_driverData, _timeSteps);
+  const Waveform& driverWaveform = assembleDriverWaveform(_driverData, _timeSteps);
   /// update driver data
   const Device& driverSource = _ckt->device(_driverArc->driverSourceId());
   PWLValue& driverData = _ckt->PWLData(driverSource);
-  double vdd = _driverArc->nldmData()->owner()->voltage();
-  //populatePWLData(_tZero, _tDelta, vdd, _isRiseOnDriverPin, driverData);
   driverData._time.clear();
   driverData._value.clear();
   for (const auto& p : driverWaveform.data()) {

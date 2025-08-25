@@ -8,23 +8,24 @@ CSMReceiver::CSMReceiver(Circuit* ckt, const CellArc* loadArc)
 : _loadArc(loadArc), _ckt(ckt) {}
 
 void
-CSMReceiver::calcReceiverCap(const SimResult& SimResult) 
+CSMReceiver::calcReceiverCap(const SimResult& simResult) 
 {
   const Waveform& loadPinWaveform = simResult.nodeVoltageWaveform(_loadArc->inputTranNode());
   bool isRise = loadPinWaveform.isRise();
   _isInputRise = isRise;
   const LibData* libData = _loadArc->libData();
-  double inputTran = loadPinWaveform.transitionTime(libata);
+  double inputTran = loadPinWaveform.transitionTime(libData);
   RampVCellDelay nldmCalc(_loadArc, _ckt);
   nldmCalc.setInputTransition(inputTran);
   nldmCalc.setIsInputTranRise(isRise);
   bool success = nldmCalc.calculate();
+  assert(success == true);
   double effCap = nldmCalc.effCap();
   LUTType rcvCapLUTType = LUTType::RiseRecvCap;
   if (isRise == false) {
     rcvCapLUTType = LUTType::FallRecvCap;
   }
-  const std::vector<NLDMLUT>& recvCapLUT = _loadArc->getRecvCap(rcvCapLUTType);
+  const std::vector<NLDMLUT>& recvCapLUT = _loadArc->ccsData()->getRecvCap(rcvCapLUTType);
   double voltage = libData->voltage();
   if (isRise == false) voltage = -voltage;
   double dv = voltage / recvCapLUT.size();

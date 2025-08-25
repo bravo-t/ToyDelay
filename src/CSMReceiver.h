@@ -2,12 +2,15 @@
 #define _NA_CCSRECV_H_
 
 #include <vector>
+#include <cassert>
 #include "Base.h"
 #include "LibData.h"
 
 namespace NA {
 
 class Circuit;
+class CellArc;
+class SimResult;
    
 class CSMReceiver {
   public:

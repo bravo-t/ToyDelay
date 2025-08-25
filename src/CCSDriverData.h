@@ -13,7 +13,7 @@ class CCSDriverData {
     void init(const CCSArc* cellArc, bool isRise);
     
     double referenceTime(double inputTran) const;
-    Waveform driverWaveform(double inputTran, double outputLoad);
+    Waveform driverWaveform(double inputTran, double outputLoad) const;
     double timeAtVoltage(double inputTran, double outputLoad, double voltage) const;
     std::vector<double> timeSteps(double inputTran, const std::vector<double>& effCaps) const;
     std::vector<double> timeSteps(double inputTran, double outputLoad) const;

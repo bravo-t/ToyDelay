@@ -24,7 +24,7 @@ class CSMCellDelay {
     std::vector<const CellArc*> loadArcs() const;
 
   private:
-    bool updateCircuit() const;
+    bool updateCircuit();
     void initData();
     void updateReceiverCap(const SimResult& simResult) const;
     void updateReceiverModel(const SimResult& simResult) const;

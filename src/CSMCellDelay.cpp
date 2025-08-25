@@ -49,7 +49,7 @@ CSMCellDelay::initData()
 }
 
 bool
-CSMCellDelay::updateCircuit() const
+CSMCellDelay::updateCircuit()
 {
   updateReceiverCap(_simResult);
   return _driver.updateCircuit(_simResult);
