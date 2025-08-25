@@ -11,7 +11,7 @@ namespace NA {
 
 class CSMDelay {
   public:
-    CSMDelay(const AnalysisParameter& param, const NetlistParser& parser);
+    CSMDelay(const AnalysisParameter& param, const NetlistParser& parser, bool isMaxDelay);
 
     void calculate();
 
@@ -19,6 +19,7 @@ class CSMDelay {
     void calculateArc(const CellArc* driverArc);
 
   private:
+    bool    _isMaxDelay;
     Circuit _ckt;
     std::vector<const CellArc*> _cellArcs;
 };

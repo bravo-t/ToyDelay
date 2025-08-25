@@ -88,4 +88,12 @@ measureVoltage(const SimResult& result, size_t nodeId, const LibData* libData,
   }
 }
 
+void
+markSimulationScope(size_t devId, Circuit* ckt)
+{
+  const std::vector<const Device*>& connDevs = ckt->traceDevice(devId);
+  ckt->resetSimulationScope();
+  ckt->markSimulationScope(connDevs);
+}
+
 }

@@ -21,6 +21,8 @@ class CSMCellDelay {
     SimResult result() const { return _simResult; }
     bool isRiseOnOutputPin() const { return _isRiseOnDriverPin; }
 
+    std::vector<const CellArc*> loadArcs() const;
+
   private:
     void updateCircuit() const;
     void initData();

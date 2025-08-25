@@ -19,6 +19,8 @@ class CSMReceiver {
     /// to calculate receiver cap values
     void calcReceiverCap(const SimResult& simResult);
 
+    const CellArc* loadArc() const { return _loadArc; }
+
   private:
   private:
     bool                _isInputRise = true;

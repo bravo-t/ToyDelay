@@ -4,11 +4,12 @@
 #include "SimResult.h"
 #include "Debug.h"
 #include "CommonUtils.h"
+#include "Plotter.h"
 
 namespace NA {
 
-CSMDelay::CSMDelay(const AnalysisParameter& param, const NetlistParser& parser)
-: _ckt(parser, param)
+CSMDelay::CSMDelay(const AnalysisParameter& param, const NetlistParser& parser, bool isMaxDelay)
+: _isMaxDelay(isMaxDelay), _ckt(parser, param)
 {
   const std::vector<std::string>& pinsToCalc = parser.cellOutPinsToCalcDelay();
   for (const std::string& outPin : pinsToCalc) {
@@ -46,21 +47,9 @@ populatePlotData(PlotData& plotData, size_t fromNodeId, size_t toNodeId, const C
 void
 CSMDelay::calculateArc(const CellArc* driverArc)
 {
-  CSMCellDelay cellDelayCalc(driverArc, &_ckt);
+  CSMCellDelay cellDelayCalc(driverArc, &_ckt, _isMaxDelay);
   cellDelayCalc.calculate();
-  if (Debug::enabled(DebugModule::CCS)) {
-    printf("DEBUG: Starting network simulation for net arc delay calculation\n");
-  }
-  AnalysisParameter simParam;
-  simParam._name = simName;
-  simParam._type = AnalysisType::Tran;
-  simParam._simTime = 1e99;
-  simParam._simTick = cellDelayCalc.tDelta() / 1000;
-  simParam._intMethod = IntegrateMethod::Trapezoidal;
-  Simulator sim(_ckt, simParam);
-  const std::vector<const CellArc*>& loadArcs = setTerminationCondition(&_ckt, driverArc, cellDelayCalc.isRiseOnOutputPin(), sim);
-  sim.run();
-  const SimResult& simResult = sim.simulationResult();
+  const SimResult& simResult = cellDelayCalc.result();
   const LibData* libData = driverArc->libData();
   //const Device& inputSrc = _ckt.device(driverArc->inputSourceDevId(&_ckt));
   size_t inputNodeId = driverArc->inputNode();
@@ -80,6 +69,7 @@ CSMDelay::calculateArc(const CellArc* driverArc)
     populatePlotData(cellArcPlotData, driverArc->inputNode(), driverArc->outputNode(&_ckt), &_ckt);
     Plotter::plot(cellArcPlotData, {_ckt}, {simResult});
   }
+  const std::vector<const CellArc*>& loadArcs = cellDelayCalc.loadArcs();
   for (const CellArc* loadArc : loadArcs) {
     size_t loadNode = loadArc->inputNode();
     double loadT50;

@@ -1,4 +1,5 @@
 #include "CSMCellDelay.h"
+#include "CommonUtils.h"
 
 namespace NA {
 
@@ -8,14 +9,6 @@ CSMCellDelay(const CellArc* cellArc, Circuit* ckt, bool isMaxDelay)
   _isMaxDelay(isMaxDelay)
 {}
 
-
-void
-markSimulationScope(size_t devId, Circuit* ckt)
-{
-  const std::vector<const Device*>& connDevs = ckt->traceDevice(devId);
-  ckt->resetSimulationScope();
-  ckt->markSimulationScope(connDevs);
-}
 
 void 
 CSMCellDelay::initData()
@@ -101,15 +94,16 @@ CSMCellDelay::calcIteration(bool& converged)
   _simResult.clear();
   AnalysisParameter simParam;
   simParam._type = AnalysisType::Tran;
-  simParam._simTime = _tDelta * 1.2;
-  simParam._simTick = simParam._simTime / 1000;
+  simParam._simTime = _driver.inputTransition() * 10;
+  simParam._simTick = _driver.inputTransition() / 100;
   simParam._intMethod = IntegrateMethod::Trapezoidal;
   Simulator sim(*_ckt, simParam);
+  setTerminationCondition(_ckt, _cellArc, _isRiseOnOutputPin, sim);
   std::function<void(void)> f = [this, &simResult]() {
     this->updateReceiverCap(simResult);
   };
   sim.setUpdateFunction(f);
-  if (Debug::enabled(DebugModule::NLDM)) {
+  if (Debug::enabled(DebugModule::CCS)) {
     printf("DEBUG: start transient simualtion\n");
   }
   sim.run();
@@ -124,6 +118,19 @@ CSMCellDelay::calculate()
   while (!converged) {
     calcIteration(converged);
   }
+}
+
+std::vector<const CellArc*>
+CSMCellDelay::loadArcs() const
+{
+  std::vector<const CellArc*> arcs;
+  for (const auto& kv : _receiverMap) {
+    const ReceiverVec& rcvrs = kv.second;
+    for (const CSMReceiver& rcvr : rcvrs) {
+      arcs.push_back(rcvr.loadArc());
+    }
+  }
+  return arcs;
 }
 
 }
