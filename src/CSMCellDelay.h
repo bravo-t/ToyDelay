@@ -24,14 +24,17 @@ class CSMCellDelay {
     std::vector<const CellArc*> loadArcs() const;
 
   private:
-    void updateCircuit() const;
+    bool updateCircuit() const;
     void initData();
+    void updateReceiverCap(const SimResult& simResult) const;
+    void updateReceiverModel(const SimResult& simResult) const;
+    bool calcIteration(bool& converged);
+
 
   private:
     const CellArc*       _cellArc;
     Circuit*             _ckt;
     const LibData*       _libData;
-    std::vector<Device*> _loadCaps;
     SimResult            _simResult;
     bool                 _isRiseOnInputPin = true;
     bool                 _isRiseOnDriverPin = true;
@@ -45,6 +48,7 @@ class CSMCellDelay {
     typedef std::vector<CSMReceiver> ReceiverVec;
     typedef std::unordered_map<size_t, ReceiverVec> ReceiverMap;
     ReceiverMap          _receiverMap;
+    std::vector<size_t>  _loadCaps;
 };
 
 }

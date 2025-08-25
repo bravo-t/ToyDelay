@@ -1,7 +1,15 @@
 #ifndef _NA_DLY_COMUTL_H_
 #define _NA_DLY_COMUTL_H_
 
+#include <vector>
+
 namespace NA {
+
+class Circuit;
+class CellArc;
+class LibData;
+class SimResult;
+class Simulator;
 
 std::vector<const CellArc*>
 setTerminationCondition(const Circuit* ckt, const CellArc* driverArc, 

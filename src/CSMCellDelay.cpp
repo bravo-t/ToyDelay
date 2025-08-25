@@ -1,14 +1,17 @@
 #include "CSMCellDelay.h"
 #include "CommonUtils.h"
+#include "Simulator.h"
+#include "Debug.h"
 
 namespace NA {
 
-CSMCellDelay(const CellArc* cellArc, Circuit* ckt, bool isMaxDelay)
+CSMCellDelay::CSMCellDelay(const CellArc* cellArc, Circuit* ckt, bool isMaxDelay)
 : _cellArc(cellArc), _ckt(ckt), 
   _libData(cellArc->nldmData()->owner()), 
   _isMaxDelay(isMaxDelay)
 {}
 
+static size_t invalidId = static_cast<size_t>(-1);
 
 void 
 CSMCellDelay::initData()
@@ -33,13 +36,13 @@ CSMCellDelay::initData()
   const std::vector<const Device*>& connDevs = _ckt->traceDevice(rdId);
   for (const Device* dev : connDevs) {
     if (dev->_type == DeviceType::Capacitor && dev->_isInternal) {
-      _loadCaps.push_back(dev);
+      _loadCaps.push_back(dev->_devId);
       const std::vector<CellArc*>& loadArcs = _ckt->cellArcsOfDevice(dev);
       ReceiverVec recvr;
       for (const CellArc* loadArc : loadArcs) {
         recvr.push_back(CSMReceiver(_ckt, loadArc));
       }
-      _receiverMap.insert({dev._devId, recvr});
+      _receiverMap.insert({dev->_devId, recvr});
     }
   }
   markSimulationScope(vSrcId, _ckt);
@@ -55,8 +58,7 @@ CSMCellDelay::updateCircuit() const
 void
 CSMCellDelay::updateReceiverCap(const SimResult& simResult) const
 {
-  for (Device* loadCap : _loadCaps) {
-    size_t capId = loadCap->_devId;
+  for (size_t capId : _loadCaps) {
     const auto& found = _receiverMap.find(capId);
     assert(found != _receiverMap.end());
     const ReceiverVec& rcvModels = found->second;
@@ -64,14 +66,15 @@ CSMCellDelay::updateReceiverCap(const SimResult& simResult) const
     for (const CSMReceiver& rcvModel : rcvModels) {
       double capValue = rcvModel.capValue(simResult);
       if (_isMaxDelay) {
-        cap = std::max(cap, loadCap);
+        cap = std::max(cap, capValue);
       } else {
-        cap = std::min(cap, loadCap);
+        cap = std::min(cap, capValue);
       }
     }
-    loadCap->_value = cap;
+    Device& capDev = _ckt->device(capId);
+    capDev._value = cap;
     if (Debug::enabled(DebugModule::CCS)) {
-      printf("DEBUG: Load cap %s value updated to %G\n", loadCap->_name.data(), loadCap->_value);
+      printf("DEBUG: Load cap %s value updated to %G\n", capDev._name.data(), capDev._value);
     }
   }
 }
@@ -90,7 +93,7 @@ CSMCellDelay::updateReceiverModel(const SimResult& simResult) const
 bool
 CSMCellDelay::calcIteration(bool& converged)
 {
-  converged = updateCircuit(_simResult);
+  converged = updateCircuit();
   _simResult.clear();
   AnalysisParameter simParam;
   simParam._type = AnalysisType::Tran;
@@ -98,9 +101,9 @@ CSMCellDelay::calcIteration(bool& converged)
   simParam._simTick = _driver.inputTransition() / 100;
   simParam._intMethod = IntegrateMethod::Trapezoidal;
   Simulator sim(*_ckt, simParam);
-  setTerminationCondition(_ckt, _cellArc, _isRiseOnOutputPin, sim);
-  std::function<void(void)> f = [this, &simResult]() {
-    this->updateReceiverCap(simResult);
+  setTerminationCondition(_ckt, _cellArc, _isRiseOnDriverPin, sim);
+  std::function<void(void)> f = [this]() {
+    this->updateReceiverCap(this->_simResult);
   };
   sim.setUpdateFunction(f);
   if (Debug::enabled(DebugModule::CCS)) {
@@ -118,6 +121,7 @@ CSMCellDelay::calculate()
   while (!converged) {
     calcIteration(converged);
   }
+  return converged;
 }
 
 std::vector<const CellArc*>
