@@ -311,8 +311,9 @@ CCSDriverData::interpolateVoltageWaveforms(double inputTran, double outputLoad,
   const CCSGroup& groupData = ccsGroup();
   size_t idx1 = 0, idx2 = 0, idx3 = 0, idx4 = 0;
   findBoundingIndex(groupData, inputTran, outputLoad, idx1, idx2, idx3, idx4);
-  const CCSLUT& lut1 = groupData.tables()[idx1];
-  const CCSLUT& lut4 = groupData.tables()[idx4];
+  const std::vector<CCSLUT>& luts = groupData.tables();
+  const CCSLUT& lut1 = luts[idx1];
+  const CCSLUT& lut4 = luts[idx4];
   const Waveform& v11 = _voltageWaveforms[idx1];
   const Waveform& v12 = _voltageWaveforms[idx2];
   const Waveform& v21 = _voltageWaveforms[idx3];
@@ -344,8 +345,9 @@ CCSDriverData::timeAtVoltage(double inputTran, double outputLoad, double voltage
   const CCSGroup& groupData = ccsGroup();
   size_t idx1 = 0, idx2 = 0, idx3 = 0, idx4 = 0;
   findBoundingIndex(groupData, inputTran, outputLoad, idx1, idx2, idx3, idx4);
-  const CCSLUT& lut1 = groupData.tables()[idx1];
-  const CCSLUT& lut4 = groupData.tables()[idx4];
+  const std::vector<CCSLUT>& luts = groupData.tables();
+  const CCSLUT& lut1 = luts[idx1];
+  const CCSLUT& lut4 = luts[idx4];
   const Waveform& v11 = _voltageWaveforms[idx1];
   const Waveform& v12 = _voltageWaveforms[idx2];
   const Waveform& v21 = _voltageWaveforms[idx3];

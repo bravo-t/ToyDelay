@@ -31,7 +31,6 @@ SRC_LIST = main.cpp \
 		   CCSDriverData.cpp \
 		   RampVDelay.cpp \
 		   RampVCellDelay.cpp \
-		   CommonUtils.cpp \
 		   RootSolver.cpp
 
 SRC_LIST_TMP = $(patsubst %,./%,$(SRC_LIST))

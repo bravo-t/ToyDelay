@@ -33,17 +33,6 @@ RampVDelay::calculate()
   }
 }
 
-static const char* simName = "fd";
-
-void 
-populatePlotData(PlotData& plotData, size_t fromNodeId, size_t toNodeId, const Circuit* ckt)
-{
-  plotData._nodeToPlot.push_back(ckt->node(fromNodeId)._name);
-  plotData._nodeSimName.push_back(simName);
-  plotData._nodeToPlot.push_back(ckt->node(toNodeId)._name);
-  plotData._nodeSimName.push_back(simName);
-}
-
 void
 RampVDelay::calculateArc(const CellArc* driverArc)
 {
@@ -54,7 +43,7 @@ RampVDelay::calculateArc(const CellArc* driverArc)
   }
   double tOffset = cellDelayCalc.tZero();
   AnalysisParameter simParam;
-  simParam._name = simName;
+  simParam._name = "fd";
   simParam._type = AnalysisType::Tran;
   simParam._simTime = 1e99;
   simParam._simTick = cellDelayCalc.tDelta() / 1000;

@@ -33,17 +33,6 @@ CSMDelay::calculate()
   }
 }
 
-static const char* simName = "fd";
-
-void 
-populatePlotData(PlotData& plotData, size_t fromNodeId, size_t toNodeId, const Circuit* ckt)
-{
-  plotData._nodeToPlot.push_back(ckt->node(fromNodeId)._name);
-  plotData._nodeSimName.push_back(simName);
-  plotData._nodeToPlot.push_back(ckt->node(toNodeId)._name);
-  plotData._nodeSimName.push_back(simName);
-}
-
 void
 CSMDelay::calculateArc(const CellArc* driverArc)
 {
