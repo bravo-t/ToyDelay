@@ -9,7 +9,9 @@ CSMCellDelay::CSMCellDelay(const CellArc* cellArc, Circuit* ckt, bool isMaxDelay
 : _cellArc(cellArc), _ckt(ckt), 
   _libData(cellArc->nldmData()->owner()), 
   _isMaxDelay(isMaxDelay)
-{}
+{
+  initData();
+}
 
 static size_t invalidId = static_cast<size_t>(-1);
 
@@ -32,8 +34,8 @@ CSMCellDelay::initData()
   _driver.init(_ckt, _cellArc, _isRiseOnDriverPin);
   
   /// init receiver
-  size_t rdId = _cellArc->driverResistorId();
-  const std::vector<const Device*>& connDevs = _ckt->traceDevice(rdId);
+  size_t drvId = _cellArc->driverSourceId();
+  const std::vector<const Device*>& connDevs = _ckt->traceDevice(drvId);
   for (const Device* dev : connDevs) {
     if (dev->_type == DeviceType::Capacitor && dev->_isInternal) {
       _loadCaps.push_back(dev->_devId);
@@ -45,7 +47,7 @@ CSMCellDelay::initData()
       _receiverMap.insert({dev->_devId, recvr});
     }
   }
-  markSimulationScope(vSrcId, _ckt);
+  markSimulationScope(drvId, _ckt);
 }
 
 bool

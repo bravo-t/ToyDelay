@@ -4,6 +4,7 @@
 #include "RampVCellDelay.h"
 #include "RootSolver.h"
 #include "Simulator.h"
+#include "CommonUtils.h"
 #include "Debug.h"
 
 namespace NA {
@@ -23,14 +24,6 @@ totalLoadOnDriver(const Circuit* ckt, size_t rdId)
     }
   }
   return totalCap;
-}
-
-void
-markSimulationScope(size_t rdId, Circuit* ckt)
-{
-  const std::vector<const Device*>& connDevs = ckt->traceDevice(rdId);
-  ckt->resetSimulationScope();
-  ckt->markSimulationScope(connDevs);
 }
 
 /// tranThres1 and tranThres2 are two threshold that defines transition time,

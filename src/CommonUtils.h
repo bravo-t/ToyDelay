@@ -14,8 +14,8 @@ inline std::vector<const CellArc*>
 setTerminationCondition(const Circuit* ckt, const CellArc* driverArc, 
                         bool isRiseOnDriverPin, Simulator& sim)
 {
-  size_t rdId = driverArc->driverResistorId();
-  const std::vector<const Device*>& connDevs = ckt->traceDevice(rdId);
+  size_t drvId = driverArc->driverSourceId();
+  const std::vector<const Device*>& connDevs = ckt->traceDevice(drvId);
   std::vector<const CellArc*> retval;
   for (const Device* dev : connDevs) {
     if (dev->_type == DeviceType::Capacitor && dev->_isInternal) {
