@@ -60,9 +60,6 @@ CSMCellDelay::updateCircuit()
 void
 CSMCellDelay::updateReceiverCap(const SimResult& simResult) const
 {
-  if (Debug::enabled(DebugModule::CCS)) {
-    printf("DEBUG: T@%G Load cap %s value updated to %G\n", simResult.currentTime(), capDev._name.data(), capDev._value);
-  }
   for (size_t capId : _loadCaps) {
     const auto& found = _receiverMap.find(capId);
     assert(found != _receiverMap.end());
