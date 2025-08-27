@@ -60,6 +60,9 @@ CSMCellDelay::updateCircuit()
 void
 CSMCellDelay::updateReceiverCap(const SimResult& simResult) const
 {
+  if (Debug::enabled(DebugModule::CCS)) {
+    printf("DEBUG: T@%G Load cap %s value updated to %G\n", simResult.currentTime(), capDev._name.data(), capDev._value);
+  }
   for (size_t capId : _loadCaps) {
     const auto& found = _receiverMap.find(capId);
     assert(found != _receiverMap.end());
@@ -100,6 +103,7 @@ CSMCellDelay::calcIteration(bool& converged)
   converged = updateCircuit();
   _simResult.clear();
   AnalysisParameter simParam;
+  simParam._name = "fd";
   simParam._type = AnalysisType::Tran;
   simParam._simTime = _driver.inputTransition() * 10;
   simParam._simTick = _driver.inputTransition() / 100;
