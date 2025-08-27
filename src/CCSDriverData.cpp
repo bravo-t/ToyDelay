@@ -280,7 +280,7 @@ findBoundingIndex(const CCSGroup& groupData, double inputTran, double outputLoad
   size_t beginIdx2 = searchPos[searchPos2];
   size_t endIdx2 = searchPos[searchPos2+1];
   idx3 = indexByLoad(groupData, beginIdx2, endIdx2, outputLoad);
-  idx4 = idx1 + 1;
+  idx4 = idx3 + 1;
 }
 
 static Waveform

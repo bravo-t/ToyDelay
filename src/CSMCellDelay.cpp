@@ -31,7 +31,7 @@ CSMCellDelay::initData()
 
   _isRiseOnDriverPin = (_isRiseOnInputPin != _cellArc->isInvertedArc());
 
-  _driver.init(_ckt, _cellArc, _isRiseOnDriverPin);
+  _driver.init(_ckt, _cellArc, _isRiseOnDriverPin, _isMaxDelay);
   
   /// init receiver
   size_t drvId = _cellArc->driverSourceId();
@@ -57,9 +57,10 @@ CSMCellDelay::updateCircuit()
   return _driver.updateCircuit(_simResult);
 }
 
-void
+bool
 CSMCellDelay::updateReceiverCap(const SimResult& simResult) const
 {
+  bool valuesUpdated = false;
   for (size_t capId : _loadCaps) {
     const auto& found = _receiverMap.find(capId);
     assert(found != _receiverMap.end());
@@ -79,8 +80,10 @@ CSMCellDelay::updateReceiverCap(const SimResult& simResult) const
       if (Debug::enabled(DebugModule::CCS)) {
         printf("DEBUG: T@%G Load cap %s value updated to %G\n", simResult.currentTime(), capDev._name.data(), capDev._value);
       }
+      valuesUpdated = true;
     }
   }
+  return valuesUpdated;
 }
 
 void
@@ -107,8 +110,8 @@ CSMCellDelay::calcIteration(bool& converged)
   simParam._intMethod = IntegrateMethod::Trapezoidal;
   Simulator sim(*_ckt, simParam);
   setTerminationCondition(_ckt, _cellArc, _isRiseOnDriverPin, sim);
-  std::function<void(void)> f = [this, &sim]() {
-    this->updateReceiverCap(sim.simulationResult());
+  std::function<bool(void)> f = [this, &sim]() {
+    return this->updateReceiverCap(sim.simulationResult());
   };
   sim.setUpdateFunction(f);
   if (Debug::enabled(DebugModule::CCS)) {

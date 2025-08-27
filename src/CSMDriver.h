@@ -12,7 +12,7 @@ class CellArc;
 class CSMDriver {
   public:
     CSMDriver() = default;
-    void init(Circuit* ckt, const CellArc* driverArc, bool isRise);
+    void init(Circuit* ckt, const CellArc* driverArc, bool isRise, bool isMax);
     /// Generate full driver voltage waveform.
     /// If simResult is empty, effCap is constant throughout the simulation, 
     /// If simResult is available, generate effCaps for each voltage region based on simResult
@@ -27,6 +27,8 @@ class CSMDriver {
     bool updateDriverData(const SimResult& simResult);
 
   private:
+    bool           _isMax = true;
+    bool           _isRise = true;
     const CellArc* _driverArc = nullptr;
     Circuit*       _ckt = nullptr;
     double         _inputTran = 0;

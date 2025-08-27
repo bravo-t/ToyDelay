@@ -4,14 +4,30 @@
 namespace NA {
 
 double
-totalConnectedCap(const CellArc* driverArc, const Circuit* ckt) 
+totalConnectedCap(const CellArc* driverArc, const Circuit* ckt, bool isMax, bool isRise) 
 {
   double totalCap = 0;
   size_t vsrcId = driverArc->driverSourceId();
   const std::vector<const Device*>& connDevs = ckt->traceDevice(vsrcId);
   for (const Device* dev : connDevs) {
     if (dev->_type == DeviceType::Capacitor) {
-      totalCap += dev->_value;
+      if (dev->_isInternal) {
+        const std::vector<CellArc*>& loadArcs = ckt->cellArcsOfDevice(dev);
+        double arcCap = 0;
+        if (isMax == false) {
+          arcCap = 1e99;
+        }
+        for (const CellArc* loadArc : loadArcs) {
+          if (isMax) {
+            arcCap = std::max(arcCap, loadArc->fixedLoadCap(isRise));
+          } else { 
+            arcCap = std::min(arcCap, loadArc->fixedLoadCap(isRise));
+          }
+        }
+        totalCap += arcCap;
+      } else {
+        totalCap += dev->_value;
+      }
     }
   }
   return totalCap;
@@ -21,8 +37,10 @@ totalConnectedCap(const CellArc* driverArc, const Circuit* ckt)
 /// Init will calculate every data based on previous iteration of simulation, 
 /// Including timeSteps, effCaps of each time step, and driver waveform
 void 
-CSMDriver::init(Circuit* ckt, const CellArc* driverArc, bool isRise)
+CSMDriver::init(Circuit* ckt, const CellArc* driverArc, bool isRise, bool isMax)
 {
+  _isRise = isRise;
+  _isMax = isMax;
   _driverArc = driverArc;
   _ckt = ckt;
   _driverData.init(driverArc->ccsData(), isRise);
@@ -67,7 +85,7 @@ bool
 CSMDriver::updateDriverData(const SimResult& simResult)
 { 
   if (simResult.empty()) {
-    _effCaps.push_back(totalConnectedCap(_driverArc, _ckt));
+    _effCaps.push_back(totalConnectedCap(_driverArc, _ckt, _isMax, _isRise));
     _timeSteps = _driverData.timeSteps(_inputTran, _effCaps[0]);
   } else {
     std::vector<double> newEffCaps;
@@ -105,7 +123,7 @@ double
 CSMDriver::calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd) const
 {
   if (simResult.empty()) {
-    return totalConnectedCap(_driverArc, _ckt);
+    return totalConnectedCap(_driverArc, _ckt, _isMax, _isRise);
   } else {
     const Device& driverSource = _ckt->device(_driverArc->driverSourceId());
     /// Add new function in SimResult to calculate charge during a time period
