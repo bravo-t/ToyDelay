@@ -74,9 +74,11 @@ CSMCellDelay::updateReceiverCap(const SimResult& simResult) const
       }
     }
     Device& capDev = _ckt->device(capId);
-    capDev._value = cap;
-    if (Debug::enabled(DebugModule::CCS)) {
-      printf("DEBUG: Load cap %s value updated to %G\n", capDev._name.data(), capDev._value);
+    if (capDev._value != cap) {
+      capDev._value = cap;
+      if (Debug::enabled(DebugModule::CCS)) {
+        printf("DEBUG: T@%G Load cap %s value updated to %G\n", simResult.currentTime(), capDev._name.data(), capDev._value);
+      }
     }
   }
 }
@@ -104,8 +106,8 @@ CSMCellDelay::calcIteration(bool& converged)
   simParam._intMethod = IntegrateMethod::Trapezoidal;
   Simulator sim(*_ckt, simParam);
   setTerminationCondition(_ckt, _cellArc, _isRiseOnDriverPin, sim);
-  std::function<void(void)> f = [this]() {
-    this->updateReceiverCap(this->_simResult);
+  std::function<void(void)> f = [this, &sim]() {
+    this->updateReceiverCap(sim.simulationResult());
   };
   sim.setUpdateFunction(f);
   if (Debug::enabled(DebugModule::CCS)) {

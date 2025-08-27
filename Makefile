@@ -64,4 +64,4 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 .PHONY: clean 
 clean:
-	-rm -f $(BIN_DIR)/$(PROG_NAME) $(BUILD_DIR)/*
+	-rm -f $(BIN_DIR)/$(PROG_NAME) $(BUILD_DIR)/* $(TRANS_DIR)/libtrans.a $(TRANS_DIR)/build/*

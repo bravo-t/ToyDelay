@@ -67,7 +67,7 @@ CSMDelay::calculateArc(const CellArc* driverArc)
     double netDelay = loadT50 - outputT50;
     printf("Net delay of %s->%s: %G, transition on %s: %G\n", driverArc->toPinFullName().data(), 
            loadArc->fromPinFullName().data(), netDelay, loadArc->fromPinFullName().data(), loadTran);
-    if (Debug::enabled(DebugModule::NLDM)) {
+    if (Debug::enabled(DebugModule::CCS)) {
       PlotData netArcPlotData;
       netArcPlotData._canvasName = "Net Delay";
       populatePlotData(netArcPlotData, driverArc->outputNode(&_ckt), loadArc->inputNode(), &_ckt);
