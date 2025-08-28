@@ -1,5 +1,7 @@
 #include <cassert>
 #include "CSMDriver.h"
+#include "Debug.h"
+#include "Plotter.h"
 
 namespace NA {
 
@@ -152,6 +154,10 @@ CSMDriver::updateCircuit(const SimResult& simResult)
 {
   bool converged = updateDriverData(simResult);
   const Waveform& driverWaveform = assembleDriverWaveform(_driverData, _timeSteps);
+  if (Debug::enabled(DebugModule::CCS)) {
+    Plotter::plotWaveforms({driverWaveform});
+  }
+
   /// update driver data
   const Device& driverSource = _ckt->device(_driverArc->driverSourceId());
   PWLValue& driverData = _ckt->PWLData(driverSource);
