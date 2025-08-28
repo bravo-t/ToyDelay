@@ -2,6 +2,7 @@
 #include "CommonUtils.h"
 #include "Simulator.h"
 #include "Debug.h"
+#include "Plotter.h"
 
 namespace NA {
 
@@ -100,6 +101,17 @@ CSMCellDelay::updateReceiverModel(const SimResult& simResult) const
 bool
 CSMCellDelay::calcIteration(bool& converged)
 {
+  ++_iterCount;
+  if (Debug::enabled(DebugModule::CCS) && _simResult.empty() == false) {
+    PlotData cellArcPlotData;
+    cellArcPlotData._canvasName = "Intermediate calculate result for iteration ";
+    cellArcPlotData._canvasName += std::to_string(_iterCount);
+    populatePlotData(cellArcPlotData, _cellArc->inputNode(), _cellArc->outputNode(_ckt), _ckt);
+    //cellArcPlotData._nodeToPlot.push_back(_ckt.node()._name);
+    //cellArcPlotData._nodeSimName.push_back("fd");
+    Plotter::plot(cellArcPlotData, {*_ckt}, {_simResult});
+  }
+
   converged = updateCircuit();
   _simResult.clear();
   AnalysisParameter simParam;
@@ -115,10 +127,11 @@ CSMCellDelay::calcIteration(bool& converged)
   };
   sim.setUpdateFunction(f);
   if (Debug::enabled(DebugModule::CCS)) {
-    printf("DEBUG: start transient simualtion\n");
+    printf("DEBUG: start transient simualtion for CCS calculationi\n");
   }
   sim.run();
   _simResult = sim.simulationResult();
+  updateReceiverModel(_simResult);
   return true;
 }
 

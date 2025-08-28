@@ -40,6 +40,7 @@ class CSMCellDelay {
     bool                 _isRiseOnDriverPin = true;
     bool                 _setTerminationCondition = false;
     bool                 _isMaxDelay = true;
+    size_t               _iterCount = 0;
     double               _delayThres = 50;
     double               _tranThres1 = 10;
     double               _tranThres2 = 90;

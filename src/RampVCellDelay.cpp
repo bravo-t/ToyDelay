@@ -298,7 +298,7 @@ RampVCellDelay::calcIteration()
   simParam._intMethod = IntegrateMethod::Trapezoidal;
   Simulator sim(*_ckt, simParam);
   if (Debug::enabled(DebugModule::NLDM)) {
-    printf("DEBUG: start transient simualtion\n");
+    printf("DEBUG: start transient simualtion for NLDM calculation\n");
   }
   sim.run();
   const SimResult& simResult = sim.simulationResult();
