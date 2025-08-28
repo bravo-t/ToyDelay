@@ -127,10 +127,13 @@ CSMCellDelay::calcIteration(bool& converged)
   };
   sim.setUpdateFunction(f);
   if (Debug::enabled(DebugModule::CCS)) {
-    printf("DEBUG: start transient simualtion for CCS calculationi\n");
+    printf("DEBUG: start transient simualtion for CCS calculation\n");
   }
   sim.run();
   _simResult = sim.simulationResult();
+  if (Debug::enabled(DebugModule::CCS)) {
+    printf("DEBUG: Simulation finished in T@%G, expected %G\n", _simResult.currentTime(), simParam._simTime);
+  }
   updateReceiverModel(_simResult);
   return true;
 }

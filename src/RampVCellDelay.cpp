@@ -71,8 +71,12 @@ RampVCellDelay::updateTParams()
 void 
 RampVCellDelay::updateRd()
 {
-  double t90 = extrapolateDelayTime(_t50, _driverPinTran, rdMatchPoint);
-  _rd = (t90 - _t50) / (_effCap * log(5));
+  if (_effCap == 0) {
+    _rd = 1e-6;
+  } else {
+    double t90 = extrapolateDelayTime(_t50, _driverPinTran, rdMatchPoint);
+    _rd = (t90 - _t50) / (_effCap * log(5));
+  }
 }
 
 void
