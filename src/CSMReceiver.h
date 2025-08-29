@@ -14,7 +14,7 @@ class SimResult;
    
 class CSMReceiver {
   public:
-    CSMReceiver(Circuit* ckt, const CellArc* loadArc);
+    CSMReceiver(Circuit* ckt, const CellArc* loadArc, bool isLoadPinRise);
     /// This function is called inside CSM calculation iteration
     /// to update receiver capacitors
     double capValue(const SimResult& simResult) const;
@@ -25,8 +25,12 @@ class CSMReceiver {
     const CellArc* loadArc() const { return _loadArc; }
 
   private:
+    /// Used in the first iteration
+    void calcFixedReceiverCap();
+
   private:
-    bool                _isInputRise = true;
+    bool                _isLoadPinRise = true;
+    LUTType             _rcvCapLUTType = LUTType::RiseRecvCap;
     const CellArc*      _loadArc = nullptr;
     Circuit*            _ckt = nullptr;
     std::vector<double> _recvCaps;

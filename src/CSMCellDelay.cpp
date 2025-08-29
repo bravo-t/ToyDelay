@@ -43,7 +43,7 @@ CSMCellDelay::initData()
       const std::vector<CellArc*>& loadArcs = _ckt->cellArcsOfDevice(dev);
       ReceiverVec recvr;
       for (const CellArc* loadArc : loadArcs) {
-        recvr.push_back(CSMReceiver(_ckt, loadArc));
+        recvr.push_back(CSMReceiver(_ckt, loadArc, _isRiseOnDriverPin));
       }
       _receiverMap.insert({dev->_devId, recvr});
     }
@@ -54,7 +54,7 @@ CSMCellDelay::initData()
 bool
 CSMCellDelay::updateCircuit()
 {
-  updateReceiverCap(_simResult);
+  updateReceiverModel(_simResult);
   return _driver.updateCircuit(_simResult);
 }
 
@@ -134,7 +134,6 @@ CSMCellDelay::calcIteration(bool& converged)
   if (Debug::enabled(DebugModule::CCS)) {
     printf("DEBUG: Simulation finished in T@%G, expected %G\n", _simResult.currentTime(), simParam._simTime);
   }
-  updateReceiverModel(_simResult);
   return true;
 }
 
