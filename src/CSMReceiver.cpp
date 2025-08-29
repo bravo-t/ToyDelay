@@ -93,12 +93,12 @@ CSMReceiver::capValue(const SimResult& simResult) const
       double thresVoltage2 = _capThresholdVoltage[i];
       double thresVoltage1 = _capThresholdVoltage[i-1];
       if (_isLoadPinRise) {
-        if (inputVoltage > thresVoltage1 && inputVoltage <= thresVoltage2) {
+        if (inputVoltage >= thresVoltage1 && inputVoltage < thresVoltage2) {
           loadCap = _recvCaps[i-1];
           break;
         }
       } else {
-        if (inputVoltage < thresVoltage1 && inputVoltage >= thresVoltage2) {
+        if (inputVoltage <= thresVoltage1 && inputVoltage > thresVoltage2) {
           loadCap = _recvCaps[i-1];
           break;
         }

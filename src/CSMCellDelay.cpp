@@ -88,9 +88,9 @@ CSMCellDelay::updateReceiverCap(const SimResult& simResult) const
 }
 
 void
-CSMCellDelay::updateReceiverModel(const SimResult& simResult) const
+CSMCellDelay::updateReceiverModel(const SimResult& simResult)
 {
-  for (auto kv : _receiverMap) {
+  for (auto& kv : _receiverMap) {
     ReceiverVec& rcvModels = kv.second;
     for (CSMReceiver& rcvModel : rcvModels) {
       rcvModel.calcReceiverCap(simResult);

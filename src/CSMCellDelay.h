@@ -27,7 +27,7 @@ class CSMCellDelay {
     bool updateCircuit();
     void initData();
     bool updateReceiverCap(const SimResult& simResult) const;
-    void updateReceiverModel(const SimResult& simResult) const;
+    void updateReceiverModel(const SimResult& simResult);
     bool calcIteration(bool& converged);
 
 
