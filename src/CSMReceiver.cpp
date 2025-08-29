@@ -1,6 +1,7 @@
 #include "LibData.h"
 #include "CSMReceiver.h"
 #include "RampVCellDelay.h"
+#include "Debug.h"
 
 namespace NA {
 
@@ -21,6 +22,9 @@ CSMReceiver::calcReceiverCap(const SimResult& simResult)
   bool success = nldmCalc.calculate();
   assert(success == true);
   double effCap = nldmCalc.effCap();
+  if (Debug::enabled(DebugModule::CCS)) {
+    printf("DEBUG: EffCap connected on %s is %G\n", _loadArc->toPinFullName().data(), effCap);
+  }
   LUTType rcvCapLUTType = LUTType::RiseRecvCap;
   if (isRise == false) {
     rcvCapLUTType = LUTType::FallRecvCap;
@@ -29,10 +33,21 @@ CSMReceiver::calcReceiverCap(const SimResult& simResult)
   double voltage = libData->voltage();
   if (isRise == false) voltage = -voltage;
   double dv = voltage / recvCapLUT.size();
+  if (Debug::enabled(DebugModule::CCS)) {
+    printf("DEBUG: Receiver cap on %s is: [", _loadArc->fromPinFullName().data());
+  }
   for (size_t i=0; i<recvCapLUT.size(); ++i) {
-    _capThresholdVoltage.push_back(i*dv);
+    double vThres = i*dv;
+    _capThresholdVoltage.push_back(vThres);
     const NLDMLUT& lut = recvCapLUT[i];
-    _recvCaps.push_back(lut.value(inputTran, effCap));
+    double cValue = lut.value(inputTran, effCap);
+    _recvCaps.push_back(cValue);
+    if (Debug::enabled(DebugModule::CCS)) {
+      printf("{%.3f %G} ", vThres, cValue);
+    }
+  }
+  if (Debug::enabled(DebugModule::CCS)) {
+    printf("]\n");
   }
   _capThresholdVoltage.push_back(voltage);
 }

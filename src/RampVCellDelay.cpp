@@ -257,6 +257,9 @@ RampVCellDelay::updateDriverParameter()
 bool
 RampVCellDelay::calcIteration()
 {
+  if (_effCap == 0) {
+    return false;
+  }
   RootSolver::Function f1 = [this](const Eigen::VectorXd& x)->double {
     return y(this->_t50, x(0), x(1), _rd, _effCap) - 0.5;
   };
