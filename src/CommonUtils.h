@@ -18,7 +18,7 @@ setTerminationCondition(const Circuit* ckt, const CellArc* driverArc,
   const std::vector<const Device*>& connDevs = ckt->traceDevice(drvId);
   std::vector<const CellArc*> retval;
   for (const Device* dev : connDevs) {
-    if (dev->_type == DeviceType::Capacitor && dev->_isInternal) {
+    if (dev->_isInternal && (dev->_type == DeviceType::VoltageSource || dev->_type == DeviceType::Capacitor)) {
       const std::vector<CellArc*>& loadArcs = ckt->cellArcsOfDevice(dev);
       double termVoltage = 0;
       const CellArc* loadArc = nullptr;

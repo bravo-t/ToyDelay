@@ -89,18 +89,24 @@ CSMReceiver::capValue(const SimResult& simResult) const
   double loadCap = 0;
   if (simResult.empty() == false) {
     double inputVoltage = simResult.latestVoltage(_loadArc->inputTranNode());
-    for (size_t i=1; i<_capThresholdVoltage.size(); ++i) {
-      double thresVoltage2 = _capThresholdVoltage[i];
-      double thresVoltage1 = _capThresholdVoltage[i-1];
-      if (_isLoadPinRise) {
-        if (inputVoltage >= thresVoltage1 && inputVoltage < thresVoltage2) {
-          loadCap = _recvCaps[i-1];
-          break;
-        }
-      } else {
-        if (inputVoltage <= thresVoltage1 && inputVoltage > thresVoltage2) {
-          loadCap = _recvCaps[i-1];
-          break;
+    if (inputVoltage < _capThresholdVoltage[0]) {
+      loadCap = _recvCaps[0];
+    } else if (inputVoltage > _capThresholdVoltage.back()) {
+      loadCap = _recvCaps.back();
+    } else {
+      for (size_t i=1; i<_capThresholdVoltage.size(); ++i) {
+        double thresVoltage2 = _capThresholdVoltage[i];
+        double thresVoltage1 = _capThresholdVoltage[i-1];
+        if (_isLoadPinRise) {
+          if (inputVoltage >= thresVoltage1 && inputVoltage < thresVoltage2) {
+            loadCap = _recvCaps[i-1];
+            break;
+          }
+        } else {
+          if (inputVoltage <= thresVoltage1 && inputVoltage > thresVoltage2) {
+            loadCap = _recvCaps[i-1];
+            break;
+          }
         }
       }
     }

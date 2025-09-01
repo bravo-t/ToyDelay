@@ -117,7 +117,7 @@ CSMCellDelay::calcIteration(bool& converged)
   AnalysisParameter simParam;
   simParam._name = "fd";
   simParam._type = AnalysisType::Tran;
-  simParam._simTime = _driver.inputTransition() * 10;
+  simParam._simTime = _driver.inputTransition() * 100;
   simParam._simTick = _driver.inputTransition() / 100;
   simParam._intMethod = IntegrateMethod::Trapezoidal;
   Simulator sim(*_ckt, simParam);
