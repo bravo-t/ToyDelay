@@ -30,6 +30,7 @@ class CCSDriverData {
   private:
     bool                  _isRise;
     const CCSArc*         _arc;
+    double                _termVoltage;
     double                _vth;
     double                _vl;
     double                _vh;

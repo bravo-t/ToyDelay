@@ -7,7 +7,7 @@ namespace NA {
 
 void
 initVoltageRegions(bool extend, bool isRise, const LibData* libData, 
-                   std::vector<double>& voltageRegions, 
+                   std::vector<double>& voltageRegions, double termVoltage,
                    double& vth, double& vl, double& vh)
 {
   double fullVoltage = libData->voltage();
@@ -37,8 +37,12 @@ initVoltageRegions(bool extend, bool isRise, const LibData* libData,
   voltageRegions.push_back(vl);
   voltageRegions.push_back(vh);
   voltageRegions.push_back(vth);
+  voltageRegions.push_back(termVoltage);
   std::sort(voltageRegions.begin(), voltageRegions.end());
   voltageRegions.erase(std::unique(voltageRegions.begin(), voltageRegions.end()), voltageRegions.end());
+  if (isRise == false) {
+    std::reverse(voltageRegions.begin(), voltageRegions.end());
+  }
 }
 
 void
@@ -51,7 +55,7 @@ CCSDriverData::init(const CCSArc* arc, bool isRise)
     type = LUTType::FallCurrent;
   }
   initVoltageWaveforms(_arc->getCurrent(type));
-  initVoltageRegions(false, isRise, arc->owner(), _voltageSteps, _vth, _vl, _vh);
+  initVoltageRegions(false, isRise, arc->owner(), _voltageSteps, _termVoltage, _vth, _vl, _vh);
 }
 
 const CCSGroup&
@@ -105,9 +109,19 @@ CCSDriverData::initVoltageWaveforms(const CCSGroup& luts)
 {
   const CCSLUTS& lutTables = luts.tables();
   _voltageWaveforms.reserve(lutTables.size());
+  _termVoltage = 1e99;
+  if (_isRise == false) {
+    _termVoltage = -1e99;
+  }
   for (const CCSLUT& lutTable : lutTables) {
     const Waveform& volWave = calcVoltageWaveform(lutTable, _isRise);
     _voltageWaveforms.push_back(volWave);
+    double lastVol = volWave.data().back()._value;
+    if (_isRise) {
+      _termVoltage = std::min(_termVoltage, lastVol);
+    } else {
+      _termVoltage = std::max(_termVoltage, lastVol);
+    }
   }
 }
 

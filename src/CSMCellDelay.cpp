@@ -107,8 +107,15 @@ CSMCellDelay::calcIteration(bool& converged)
     cellArcPlotData._canvasName = "Intermediate calculate result for iteration ";
     cellArcPlotData._canvasName += std::to_string(_iterCount);
     populatePlotData(cellArcPlotData, _cellArc->inputNode(), _cellArc->outputNode(_ckt), _ckt);
-    //cellArcPlotData._nodeToPlot.push_back(_ckt.node()._name);
-    //cellArcPlotData._nodeSimName.push_back("fd");
+    Plotter::plot(cellArcPlotData, {*_ckt}, {_simResult});
+
+    cellArcPlotData._nodeToPlot.clear();
+    cellArcPlotData._nodeSimName.clear();
+    for (size_t loadCapId : _loadCaps) {
+      const Device& loadCap = _ckt->device(loadCapId);
+      cellArcPlotData._nodeToPlot.push_back(_ckt->node(loadCap._posNode)._name);
+      cellArcPlotData._nodeSimName.push_back("fd");
+    }
     Plotter::plot(cellArcPlotData, {*_ckt}, {_simResult});
   }
 
@@ -119,7 +126,7 @@ CSMCellDelay::calcIteration(bool& converged)
   simParam._type = AnalysisType::Tran;
   simParam._simTime = _driver.inputTransition() * 100;
   simParam._simTick = _driver.inputTransition() / 100;
-  simParam._intMethod = IntegrateMethod::Trapezoidal;
+  simParam._intMethod = IntegrateMethod::BackwardEuler;
   Simulator sim(*_ckt, simParam);
   setTerminationCondition(_ckt, _cellArc, _isRiseOnDriverPin, sim);
   std::function<bool(void)> f = [this, &sim]() {
