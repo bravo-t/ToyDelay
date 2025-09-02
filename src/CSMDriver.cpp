@@ -93,7 +93,10 @@ CSMDriver::updateDriverData(const SimResult& simResult)
     std::vector<double> newEffCaps;
     newEffCaps.push_back(0); /// effCap @ T=0
     for (size_t i=1; i<_timeSteps.size(); ++i) {
-      newEffCaps.push_back(calcEffectiveCap(simResult, _timeSteps[i-1], _timeSteps[i]));
+      double periodStart = _timeSteps[i-1];
+      double periodEnd = _timeSteps[i];
+      double c = calcEffectiveCap(simResult, periodStart, periodEnd);
+      newEffCaps.push_back(c);
     }
     if (isVectorEqual(_effCaps, newEffCaps)) {
       return true;
@@ -130,6 +133,9 @@ CSMDriver::calcEffectiveCap(const SimResult& simResult, double timeStart, double
     const Device& driverSource = _ckt->device(_driverArc->driverSourceId());
     /// Add new function in SimResult to calculate charge during a time period
     double periodCharge = simResult.chargeBetween(driverSource, timeStart, timeEnd);
+    if (periodCharge == 0) {
+      return 0;
+    }
     double startVoltage = simResult.nodeVoltage(driverSource._posNode, timeStart);
     double endVoltage = simResult.nodeVoltage(driverSource._posNode, timeEnd);
     double newEffCap = std::abs(periodCharge / (endVoltage - startVoltage));
