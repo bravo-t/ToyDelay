@@ -47,11 +47,9 @@ setTerminationCondition(const Circuit* ckt, const CellArc* driverArc,
       const Node& negNode = ckt->node(dev->_negNode);
       assert(posNode._isGround != negNode._isGround);
       if (posNode._isGround) {
-        sim.setTerminationVoltage(negNode._nodeId, termVoltage);
-        printf("DEBUG: Node %lu expected termination voltage %G\n", negNode._nodeId, termVoltage);
+        sim.setTerminationVoltage(negNode._nodeId, isRiseOnDriverPin, termVoltage);
       } else {
-        sim.setTerminationVoltage(posNode._nodeId, termVoltage);
-        printf("DEBUG: Node %lu expected termination voltage %G\n", posNode._nodeId, termVoltage);
+        sim.setTerminationVoltage(posNode._nodeId, isRiseOnDriverPin, termVoltage);
       }
     }
   }
