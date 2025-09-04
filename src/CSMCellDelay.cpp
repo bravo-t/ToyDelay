@@ -128,7 +128,7 @@ CSMCellDelay::calcIteration(bool& converged)
   simParam._simTick = _driver.inputTransition() / 100;
   simParam._intMethod = IntegrateMethod::BackwardEuler;
   Simulator sim(*_ckt, simParam);
-  setTerminationCondition(_ckt, _cellArc, _isRiseOnDriverPin, sim);
+  setTerminationCondition(_ckt, _cellArc, _isRiseOnDriverPin, sim, _driver.simTerminalVoltage());
   std::function<bool(void)> f = [this, &sim]() {
     return this->updateReceiverCap(sim.simulationResult());
   };
