@@ -26,7 +26,7 @@ class CSMDriver {
   private:
     double calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd) const;
     bool updateDriverData(const SimResult& simResult);
-    void updateTimeSteps();
+    void updateTimeSteps(const SimResult& simResult);
 
   private:
     bool           _isMax = true;

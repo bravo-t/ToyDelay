@@ -90,6 +90,7 @@ CSMDriver::updateDriverData(const SimResult& simResult)
     _effCaps.push_back(totalConnectedCap(_driverArc, _ckt, _isMax, _isRise));
     _timeSteps = _driverData.timeSteps(_inputTran, _effCaps[0]);
   } else {
+    //updateTimeSteps(simResult);
     std::vector<double> newEffCaps;
     newEffCaps.push_back(0); /// effCap @ T=0
     for (size_t i=1; i<_timeSteps.size(); ++i) {
@@ -122,6 +123,16 @@ CSMDriver::updateDriverData(const SimResult& simResult)
     _timeSteps.swap(newTimeSteps);
   }
   return false;
+}
+
+void 
+CSMDriver::updateTimeSteps(const SimResult& simResult)
+{
+  const Device& driverSource = _ckt->device(_driverArc->driverSourceId());
+  size_t driverNodeId = driverSource._posNode;
+  const Waveform& driverWaveform = simResult.nodeVoltageWaveform(driverNodeId);
+  const std::vector<double>& voltageRegions = _driverData.voltageRegions();
+  _timeSteps = timeRegions(driverWaveform, voltageRegions);
 }
 
 double
