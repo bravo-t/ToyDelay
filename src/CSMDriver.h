@@ -21,10 +21,12 @@ class CSMDriver {
     /// which can be used to tell if the calculation is converged.
     bool updateCircuit(const SimResult& simResult);
     double inputTransition() const { return _inputTran; }
+    double simTerminalVoltage() const { return _driverData.simTerminalVoltage(); }
 
   private:
     double calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd) const;
     bool updateDriverData(const SimResult& simResult);
+    void updateTimeSteps();
 
   private:
     bool           _isMax = true;

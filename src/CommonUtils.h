@@ -1,6 +1,7 @@
 #ifndef _NA_DLY_COMUTL_H_
 #define _NA_DLY_COMUTL_H_
 
+#include <limits>
 #include "CommonUtils.h"
 #include "Circuit.h"
 #include "SimResult.h"
@@ -12,17 +13,20 @@ namespace NA {
 
 inline std::vector<const CellArc*>
 setTerminationCondition(const Circuit* ckt, const CellArc* driverArc, 
-                        bool isRiseOnDriverPin, Simulator& sim)
+                        bool isRiseOnDriverPin, Simulator& sim, double termVoltage = std::numeric_limits<double>::quiet_NaN())
 {
+  bool needCalcTermVol = std::isnan(termVoltage);
   size_t drvId = driverArc->driverSourceId();
   const std::vector<const Device*>& connDevs = ckt->traceDevice(drvId);
   std::vector<const CellArc*> retval;
   for (const Device* dev : connDevs) {
     if (dev->_isInternal && (dev->_type == DeviceType::VoltageSource || dev->_type == DeviceType::Capacitor)) {
       const std::vector<CellArc*>& loadArcs = ckt->cellArcsOfDevice(dev);
-      double termVoltage = 0;
-      const CellArc* loadArc = nullptr;
       for (const CellArc* cellArc : loadArcs) {
+        retval.push_back(cellArc);
+        if (needCalcTermVol == false) {
+          continue;
+        }
         const LibData* libData = cellArc->libData();
         double libVoltage = libData->voltage();
         double termPoint = libData->riseTransitionHighThres();
@@ -33,16 +37,13 @@ setTerminationCondition(const Circuit* ckt, const CellArc* driverArc,
         if (isRiseOnDriverPin) {
           if (v > termVoltage) {
             termVoltage = v;
-            loadArc = cellArc;
           }
         } else {
           if (v < termVoltage) {
             termVoltage = v;
-            loadArc = cellArc;
           }
         }
       }
-      retval.push_back(loadArc);
       const Node& posNode = ckt->node(dev->_posNode);
       const Node& negNode = ckt->node(dev->_negNode);
       assert(posNode._isGround != negNode._isGround);

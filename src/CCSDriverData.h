@@ -19,6 +19,7 @@ class CCSDriverData {
     std::vector<double> timeSteps(double inputTran, double outputLoad) const;
     std::vector<double> voltageRegions() const { return _voltageSteps; }
 
+    double simTerminalVoltage() const { return _termVoltage; }
 
   private:
     void initVoltageWaveforms(const CCSGroup& luts);
