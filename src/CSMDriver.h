@@ -1,13 +1,47 @@
 #ifndef _NA_CSMDRVR_H_
 #define _NA_CSMDRVR_H_
 
-#include "CCSDriverData.h"
+#include <vector>
+#include "Base.h"
+#include "LibData.h"
 #include "SimResult.h"
 
 namespace NA {
 
 class Circuit;
 class CellArc;
+
+class CSMDriverData {
+  public:
+    CSMDriverData() = default;
+    void init(const CCSArc* cellArc, bool isRise);
+    
+    double referenceTime(double inputTran) const;
+    Waveform driverWaveform(double inputTran, double outputLoad) const;
+    double timeAtVoltage(double inputTran, double outputLoad, double voltage) const;
+    std::vector<double> timeSteps(double inputTran, const std::vector<double>& effCaps) const;
+    std::vector<double> timeSteps(double inputTran, double outputLoad) const;
+    std::vector<double> voltageRegions() const { return _voltageSteps; }
+
+    double simTerminalVoltage() const { return _termVoltage; }
+
+  private:
+    void initVoltageWaveforms(const CCSGroup& luts);
+    const CCSGroup& ccsGroup() const;
+    const CCSLUT& ccsTable(size_t index) const;
+    Waveform interpolateVoltageWaveforms(double inputTran, double outputLoad, 
+                                         const std::vector<double>& timeSteps) const;
+
+  private:
+    bool                  _isRise;
+    const CCSArc*         _arc;
+    double                _termVoltage;
+    double                _vth;
+    double                _vl;
+    double                _vh;
+    std::vector<Waveform> _voltageWaveforms;
+    std::vector<double>   _voltageSteps;
+};
 
 class CSMDriver {
   public:
@@ -37,11 +71,8 @@ class CSMDriver {
     double         _inputTran = 0;
     std::vector<double> _timeSteps;
     std::vector<double> _effCaps;
-    CCSDriverData  _driverData;
+    CSMDriverData  _driverData;
 };
-
-
-
 
 }
 
