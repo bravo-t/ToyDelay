@@ -27,9 +27,9 @@ Gate cell instances: `Xinst LibCellName pinA nodeA pinB nodeB ...` (Only support
 
 `Xinst LibCellName pinA nodeA pinB nodeB ...`: Instantiates the standard cell. `LibCellName` shoule match the one in library file. `pinX` specifies the pin name of the gate cell, and `nodeX` specifies the node connected to `pinX`. 
 
-`.option [name] driver={rampvoltage|current}`: Specifies the driver model of cell timing arcs. `rampvoltage` means a ramp voltage source, in series to a resistor connected to the voltage source, will be used to model the driver pin behavior. The details are described in "Performance computation for precharacterized CMOS gates with RC loads". `current` means a current source will be used to model the driver bahavior. Right now only `rampvoltage` is supported.
+`.option [name] driver={rampvoltage|current}`: Specifies the driver model of cell timing arcs. `rampvoltage` means a ramp voltage source, in series to a resistor connected to the voltage source, will be used to model the driver pin behavior. The details are described in "Performance computation for precharacterized CMOS gates with RC loads". `current` means a current source will be used to model the driver bahavior, and composite current source (CCS) data will be used to calculate the delay.
 
-`.option [name] loader={fixed|varied}`: Specifies the behavior of the load capacitor of the loader pin. `fixed` means a fixed value will be used for the capacitor, whereas `varied` means the capacitor value will change, and the values come from receiver cap LUT. Right now only `fixed` is supported. 
+`.option [name] loader={fixed|varied}`: Specifies the behavior of the load capacitor of the loader pin. `fixed` means a fixed value will be used for the capacitor, whereas `varied` means the capacitor value will change, and the values come from receiver cap LUT.
 
 `.option [name] net={tran|awe}`: Specifies how the RC network will be handled in delay calculation. `tran` means transient simulation will be used to calculate net delay, and `awe` means pole-zero analysis will be used. Right now only `tran` is supported.
 
