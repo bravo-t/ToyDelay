@@ -22,6 +22,7 @@ class CSMDriver {
     bool updateCircuit(const SimResult& simResult);
     double inputTransition() const { return _inputTran; }
     double simTerminalVoltage() const { return _driverData.simTerminalVoltage(); }
+    double inputReferenceTime() const { return _driverData.referenceTime(_inputTran); }
 
   private:
     double calcEffectiveCap(const SimResult& simResult, double timeStart, double timeEnd) const;

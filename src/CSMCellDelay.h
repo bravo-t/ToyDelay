@@ -23,6 +23,8 @@ class CSMCellDelay {
 
     std::vector<const CellArc*> loadArcs() const;
 
+    double inputReferenceTime() const { return _driver.inputReferenceTime(); }
+
   private:
     bool updateCircuit();
     void initData();

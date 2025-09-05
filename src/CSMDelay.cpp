@@ -49,7 +49,7 @@ CSMDelay::calculateArc(const CellArc* driverArc)
   double outputT50;
   double outputTran;
   measureVoltage(simResult, outputNodeId, libData, outputT50, outputTran);
-  double cellDelay = outputT50 - inputT50;
+  double cellDelay = outputT50 - cellDelayCalc.inputReferenceTime();
   printf("Cell delay of %s:%s->%s: %G, transition on output pin: %G\n", driverArc->instance().data(), driverArc->fromPin().data(), 
           driverArc->toPin().data(), cellDelay, outputTran);
   if (Debug::enabled(DebugModule::CCS)) {
