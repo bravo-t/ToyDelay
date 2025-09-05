@@ -75,7 +75,7 @@ CCSDriverData::ccsTable(size_t index) const
 }
 
 Waveform
-calcVoltageWaveform(const CCSLUT& lutData, bool isRise) 
+calcVoltageWaveform(const CCSLUT& lutData) 
 {
   Waveform voltages;
   double cap = lutData.outputLoad();
@@ -93,9 +93,6 @@ calcVoltageWaveform(const CCSLUT& lutData, bool isRise)
     double currentI = currents[i];
     double dt = currentT - prevT;
     double dv = (prevI + currentI) / 2 * dt / cap;
-    if (isRise == false) {
-      dv = -dv;
-    }
     voltage += dv;
     voltages.addPoint(currentT, voltage);
   }
@@ -114,7 +111,7 @@ CCSDriverData::initVoltageWaveforms(const CCSGroup& luts)
     _termVoltage = -1e99;
   }
   for (const CCSLUT& lutTable : lutTables) {
-    const Waveform& volWave = calcVoltageWaveform(lutTable, _isRise);
+    const Waveform& volWave = calcVoltageWaveform(lutTable);
     _voltageWaveforms.push_back(volWave);
     double lastVol = volWave.data().back()._value;
     if (_isRise) {
