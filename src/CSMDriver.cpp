@@ -538,6 +538,7 @@ CSMDriver::updateCircuit(const SimResult& simResult)
   bool converged = updateDriverData(simResult);
   const Waveform& driverWaveform = assembleDriverWaveform(_driverData, _timeSteps);
   if (Debug::enabled(DebugModule::CCS)) {
+    printf("DEBUG: Driver pin waveform:\n");
     Plotter::plotWaveforms({driverWaveform});
   }
 

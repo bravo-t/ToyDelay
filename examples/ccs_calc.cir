@@ -10,5 +10,5 @@ Xloader INVx2_ASAP7_75t_R A N2 Y GND
 
 .delay Xdriver/Y
 .option driver=current loader=varied
-.debug CCS 0 NLDM 0 sim 0 root 0 circuit 0
+.debug CCS 1 NLDM 0 sim 0 root 0 circuit 0
 
