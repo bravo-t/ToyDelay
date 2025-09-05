@@ -28,8 +28,8 @@ class CSMCellDelay {
     void initData();
     bool updateReceiverCap(const SimResult& simResult) const;
     void updateReceiverModel(const SimResult& simResult);
+    void markSimulationScope();
     bool calcIteration(bool& converged);
-
 
   private:
     const CellArc*       _cellArc;

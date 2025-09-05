@@ -48,7 +48,13 @@ CSMCellDelay::initData()
       _receiverMap.insert({dev->_devId, recvr});
     }
   }
-  markSimulationScope(drvId, _ckt);
+}
+
+void
+CSMCellDelay::markSimulationScope()
+{
+  size_t drvId = _cellArc->driverSourceId();
+  ::NA::markSimulationScope(drvId, _ckt);
 }
 
 bool
@@ -121,6 +127,7 @@ CSMCellDelay::calcIteration(bool& converged)
 
   converged = updateCircuit();
   _simResult.clear();
+  markSimulationScope();
   AnalysisParameter simParam;
   simParam._name = "fd";
   simParam._type = AnalysisType::Tran;
