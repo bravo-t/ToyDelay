@@ -84,5 +84,6 @@ To run, just give the executable the spice deck you want to simulate.
 
 `./delay examples/nldm_calc.cir` gives an example of NLDM delay calculation.
 
-`./delay examples/ccs_calc.cir` gives an example of CCS delay calculation. The expected output can be found in `examples/ccs_calc.log`.
+`./delay examples/ccs_calc.cir` gives an example of CCS delay calculation. The expected output can be found in [examples/ccs_calc.log](examples/ccs_calc.log).
+
 
